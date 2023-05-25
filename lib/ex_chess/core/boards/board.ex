@@ -1,6 +1,8 @@
 defmodule ExChess.Core.Boards.Board do
   use GenServer
 
+  alias ExChess.Core.Pieces.{Pawn, King, Queen, Knight, Bishop, Rook}
+
   # Client
   def start_link(id) do
     GenServer.start_link(__MODULE__, [], name: {:via, Registry, {ExChessGameRegistry, id}})
@@ -8,6 +10,14 @@ defmodule ExChess.Core.Boards.Board do
 
   def build_board(id) do
     GenServer.call({:via, Registry, {ExChessGameRegistry, id}}, {:build_board})
+  end
+
+  def count(id) do
+    GenServer.call({:via, Registry, {ExChessGameRegistry, id}}, :count)
+  end
+
+  def set_board(id, color) do
+    GenServer.call({:via, Registry, {ExChessGameRegistry, id}}, {:set_board, color})
   end
 
   def move(id, from, to) do
@@ -26,15 +36,24 @@ defmodule ExChess.Core.Boards.Board do
   def handle_call({:build_board}, _from, _board) do
     board = create_board()
 
-    {:reply, {:ok, board}, board}
+    {:reply, board, board}
   end
 
-  def handle_info({:set_piece, location, piece}, board) do
-    updated_board =
-      for {loc, _} = square <- board,
-          do: if(loc == location, do: put_elem(square, 1, piece), else: square)
+  def handle_call(:count, _from, board) do
+    board =
+      Enum.with_index(board, fn square, idx -> put_elem(square, 1, idx) end) |> Enum.reverse()
 
-    {:noreply, updated_board}
+    {:reply, board, board}
+  end
+
+  def handle_call({:set_board, color}, _from, board) do
+    updated_board =
+      Enum.reduce([Rook, Knight], [], fn pieces, acc ->
+        setup_board(board, color, pieces) ++ acc
+      end)
+      |> IO.inspect()
+
+    {:reply, updated_board, updated_board}
   end
 
   def handle_call({:print_board}, _from, board) do
@@ -45,8 +64,24 @@ defmodule ExChess.Core.Boards.Board do
     {:noreply, move_piece(board, from, to, piece)}
   end
 
-  # The formation for the tuple is {x location, y location, occupant}
-  defp create_board, do: for(x <- 1..8, y <- 1..8, do: {{x, y}, nil})
+  # The formation for the tuple is {[x location, y location], occupant}
+  defp create_board do
+    for(x <- 1..8, y <- 1..8, do: {[x, y], nil})
+  end
+
+  defp setup_board(board, color, pieces) do
+    for {location, _occupant} = square <- board, into: [] do
+      piece = pieces.create_piece(color) |> pieces.set_icon()
+
+      cond do
+        location in pieces.start_location(piece) ->
+          add_piece(board, location, piece)
+
+        true ->
+          square
+      end
+    end
+  end
 
   defp move_piece(board, from, to, piece) do
     Enum.into(board, [], fn {location, occupant} = square ->
@@ -57,11 +92,9 @@ defmodule ExChess.Core.Boards.Board do
 
         location when location == from and occupant != nil ->
           remove_piece(board, from)
-          |> IO.inspect(label: "REMOVE")
 
         location when location == to and occupant == nil ->
           add_piece(board, to, piece)
-          |> IO.inspect(label: "ADD")
 
         _ ->
           square

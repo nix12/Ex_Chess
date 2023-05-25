@@ -1,4 +1,4 @@
-defmodule ExChess.Core.Pieces.Pawn do
+defmodule ExChess.Core.Pieces.Queen do
   defstruct [
     :color,
     :icon,
@@ -7,9 +7,9 @@ defmodule ExChess.Core.Pieces.Pawn do
 
   def set_icon(piece) do
     if piece.color == "white" do
-      Map.update!(piece, :icon, fn _ -> "&#x2659;" end)
+      Map.update!(piece, :icon, fn _ -> "&#x2655;" end)
     else
-      Map.update!(piece, :icon, fn _ -> "&#x265F;" end)
+      Map.update!(piece, :icon, fn _ -> "&#x265B;" end)
     end
   end
 end

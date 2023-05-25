@@ -18,6 +18,8 @@ defmodule ExChessWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+
+    live "/board/*rest", BoardLive.Show, :show
   end
 
   # Other scopes may use custom stacks.
