@@ -8,7 +8,7 @@ defmodule ExChessWeb.BoardLive.Show do
     Core.create_board(id)
 
     sorted_board =
-      Core.get_board(id) |> Enum.sort_by(fn {location, _} -> location end) |> Enum.reverse()
+      Core.set_board(id) |> Enum.sort_by(fn {location, _} -> location end) |> Enum.reverse()
 
     socket =
       socket
@@ -20,18 +20,7 @@ defmodule ExChessWeb.BoardLive.Show do
 
   def render(assigns) do
     ~H"""
-    <.live_component module={ExChessWeb.Boards} id={@board_id} board={@board} />
+    <.live_component module={ExChessWeb.Boards} id={"#{@board_id}"} board={@board} />
     """
-  end
-
-  def handle_event("click", _unsigned_params, socket) do
-    board =
-      Core.set_board(socket.assigns.board_id)
-      |> Enum.sort_by(fn {location, _} -> location end)
-      |> Enum.reverse()
-
-    socket = assign(socket, :board, board)
-
-    {:noreply, socket}
   end
 end
