@@ -22,7 +22,7 @@ defmodule ExChessWeb.Square do
 
   def handle_event("reposition", params, socket) do
     IO.inspect(params, label: "PARAMS")
-Float.floor()
+
     {:noreply, socket}
   end
 
