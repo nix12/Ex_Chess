@@ -1,33 +1,35 @@
 defmodule ExChessWeb.Square do
   use ExChessWeb, :live_component
 
+  alias Phoenix.PubSub
+
   def render(assigns) do
     ~H"""
     <div
-      id={"#{@id}-square"}
+      id={@id}
       class={["h-8 w-8 border-solid border-2 border-black", "select-none", color_board(@location)]}
       phx-hook="Sortable"
-      data-list_id={@id}
+      data-list_id={Jason.encode!(@id)}
       data-group="squares"
     >
       <%= case elem(@square, 1) do %>
         <% nil -> %>
           <span></span>
         <% piece -> %>
-          <span class="text-3xl content-center" data-id={@location}><%= raw(piece.icon) %></span>
+          <span class="text-3xl content-center" data-id={Jason.encode!(@location)}><%= raw(piece.icon) %></span>
       <% end %>
     </div>
     """
   end
 
   def handle_event("reposition", params, socket) do
-    IO.inspect(params, label: "PARAMS")
+    PubSub.broadcast(
+      ExChess.PubSub,
+      "board:" <> socket.assigns.board_id,
+      {"movement", params}
+      )
 
     {:noreply, socket}
-  end
-
-  def update(assigns, socket) do
-    {:ok, assign(socket, assigns)}
   end
 
   defp color_board(location) do

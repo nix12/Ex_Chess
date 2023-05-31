@@ -8,9 +8,10 @@ defmodule ExChessWeb.Boards do
         <%= for {location, _occupant} = square <- @board do %>
           <.live_component
             module={ExChessWeb.Square}
-            id={"#{@id}-#{location}"}
+            id={location}
             square={square}
             location={location}
+            board_id={@id}
           />
         <% end %>
       </div>

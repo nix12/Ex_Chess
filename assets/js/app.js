@@ -22,6 +22,7 @@ import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 import Sortable from "../vendor/sortable"
+import sortable from "../vendor/sortable"
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 
@@ -29,22 +30,30 @@ let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("
 let Hooks = {};
 
 Hooks.Sortable = {
-    mounted() {
-        let group = this.el.dataset.group
-        let sorter = new Sortable(this.el, {
-            group: group ? group : undefined,
-            animation: 50,
-            delay: 100,
-            dragClass: "drag-item",
-            ghostClass: "drag-ghost",
-            forceFallback: true,
-            onEnd: e => {
-                let params = {old: e.oldIndex, new: e.newIndex, to: e.to.dataset, ...e.item.dataset}
+  mounted() {
+    let group = this.el.dataset.group
+    let sorter = new Sortable(this.el, {
+      group: group ? group : undefined,
+      animation: 50,
+      delay: 100,
+      dragClass: "drag-item",
+      ghostClass: "drag-ghost",
+      forceFallback: true,
+      onEnd: e => {
+        let params = {old: e.oldIndex, new: e.newIndex, to: e.to.dataset, ...e.item.dataset}
 
-                this.pushEventTo(this.el, "reposition", params)
-            }
-        })
-    }
+        this.pushEventTo(this.el, "reposition", params)
+      }
+    })
+
+    this.handleEvent("updated", params => {
+      piece = document.querySelector(`[data-id="${params.id}"]`)
+      newLocation = document.querySelector(`[data-list_id="${params.to.list_id}"]`)
+
+      newLocation.appendChild(piece)
+
+    })
+  }
 }
 
 let liveSocket = new LiveSocket("/live", Socket, {params: {_csrf_token: csrfToken}, hooks: Hooks})
@@ -62,6 +71,4 @@ liveSocket.connect()
 // >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
-
-
 

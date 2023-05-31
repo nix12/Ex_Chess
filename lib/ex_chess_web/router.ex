@@ -19,7 +19,7 @@ defmodule ExChessWeb.Router do
 
     get "/", PageController, :home
 
-    live "/board/*rest", BoardLive.Show, :show
+    live "/board/*board_id", BoardLive.Show, :show
   end
 
   # Other scopes may use custom stacks.
