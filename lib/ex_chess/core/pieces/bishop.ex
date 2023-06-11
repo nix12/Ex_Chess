@@ -1,4 +1,7 @@
 defmodule ExChess.Core.Pieces.Bishop do
+  @moduledoc"""
+  Bishop struct
+  """
   defstruct [
     :color,
     :icon,

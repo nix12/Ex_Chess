@@ -1,4 +1,7 @@
 defmodule ExChessWeb.BoardLive.Show do
+  @moduledoc"""
+  Chess board live view.
+  """
   use ExChessWeb, :live_view
 
   alias Phoenix.PubSub
@@ -34,6 +37,9 @@ defmodule ExChessWeb.BoardLive.Show do
     """
   end
 
+  @doc"""
+  Displays updated board after chess piece movement on connected devices.
+  """
   def handle_info({"movement", params, updated_board}, socket) do
     display = updated_board |> Enum.sort_by(fn {location, _} -> location end, :desc)
     socket = assign(socket, :board, display)
@@ -44,6 +50,12 @@ defmodule ExChessWeb.BoardLive.Show do
     {:noreply, socket}
   end
 
+  @doc"""
+  Upon mount, check if current board is found. If found
+  create new board. Else, get current state of the chess board.
+  Then sort board for display.
+  Raise if board not connected to socket.
+  """
   defp start_board(board_id) do
     found_board = Registry.lookup(ExChessGameRegistry, board_id)
 

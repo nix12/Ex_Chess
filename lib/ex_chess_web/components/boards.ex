@@ -1,4 +1,7 @@
 defmodule ExChessWeb.Boards do
+  @moduledoc"""
+  Chess board live component.
+  """
   use ExChessWeb, :live_component
 
   def render(assigns) do

@@ -1,4 +1,7 @@
 defmodule ExChess.Core.Pieces.Pawn do
+  @moduledoc"""
+  Pawn struct
+  """
   defstruct [
     :color,
     :icon,

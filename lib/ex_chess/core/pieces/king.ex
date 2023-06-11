@@ -1,4 +1,7 @@
 defmodule ExChess.Core.Pieces.King do
+  @moduledoc"""
+  King struct
+  """
   defstruct [
     :color,
     :icon,

@@ -28,6 +28,7 @@ let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("
 // Sortable
 let Hooks = {};
 
+// Contains Hook for drag and drop functionality.
 Hooks.Sortable = {
   mounted() {
     let group = this.el.dataset.group

@@ -1,4 +1,7 @@
 defmodule ExChessWeb.Square do
+  @moduledoc"""
+  Render chess board squares.
+  """
   use ExChessWeb, :live_component
 
   alias Phoenix.PubSub
@@ -23,6 +26,11 @@ defmodule ExChessWeb.Square do
     """
   end
 
+  @doc"""
+  Receives message from drag and drop actions in the client. Next,
+  the position params are converted to usable lists to update the
+  server and broadcast changes.
+  """
   def handle_event("reposition", params, socket) do
     converted_params = params |> convert_values_to_list([])
     updated_board = Core.move_piece(socket.assigns.board_id, converted_params["id"], converted_params["list_id"])
@@ -36,6 +44,9 @@ defmodule ExChessWeb.Square do
     {:noreply, socket}
   end
 
+  @doc"""
+  Colors chess boards alternating squares
+  """
   defp color_board(location) do
     if location |> Enum.at(0) |> rem(2) != location |> Enum.at(1) |> rem(2) do
       "bg-gray-600"
@@ -46,16 +57,10 @@ defmodule ExChessWeb.Square do
 
   defp convert_values_to_list([], acc), do: acc |> Enum.into(%{})
 
-  defp convert_values_to_list([{k, v} = head | tail], acc) when v |> is_map() do
-    if v |> is_map() do
-      [{k2, v2} = h2 | t2] = v |> Map.to_list()
+  defp convert_values_to_list([{k, v} | tail], acc) when v |> is_map() do
+    [{_k2, v2} = h2 | _t2] = v |> Map.to_list()
 
-      convert_values_to_list(v, [h2 | acc])
-    else
-      [{k2, v2} = h2 | t2] = v
-
-      convert_values_to_list(t2, [{k2, Jason.decode!(v2)} | acc])
-    end
+    convert_values_to_list(v, [h2 | acc])
   end
 
   defp convert_values_to_list(params, acc) when params |> is_map() do

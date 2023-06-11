@@ -1,4 +1,7 @@
 defmodule ExChess.Core.Pieces.Rook do
+  @moduledoc"""
+  Rook struct
+  """
   defstruct [:color, :icon, move_set: [[1, 0], [-1, 0], [0, 1], [0, -1]]]
 
   def create_piece(color) do
