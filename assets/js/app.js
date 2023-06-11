@@ -22,7 +22,6 @@ import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 import Sortable from "../vendor/sortable"
-import sortable from "../vendor/sortable"
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 
@@ -35,7 +34,7 @@ Hooks.Sortable = {
     let sorter = new Sortable(this.el, {
       group: group ? group : undefined,
       animation: 50,
-      delay: 100,
+      delay: 50,
       dragClass: "drag-item",
       ghostClass: "drag-ghost",
       forceFallback: true,
@@ -44,14 +43,6 @@ Hooks.Sortable = {
 
         this.pushEventTo(this.el, "reposition", params)
       }
-    })
-
-    this.handleEvent("updated", params => {
-      piece = document.querySelector(`[data-id="${params.id}"]`)
-      newLocation = document.querySelector(`[data-list_id="${params.to.list_id}"]`)
-
-      newLocation.appendChild(piece)
-
     })
   }
 }

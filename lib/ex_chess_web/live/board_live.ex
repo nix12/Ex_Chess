@@ -1,37 +1,63 @@
 defmodule ExChessWeb.BoardLive.Show do
   use ExChessWeb, :live_view
 
-  alias ExChess.Core
   alias Phoenix.PubSub
+  alias ExChess.Core
 
-  def mount(%{"board_id" => [board_id | _empty]}, session, socket) do
-    found_board = Registry.lookup(ExChessGameRegistry, board_id)
+  def mount(%{"board_id" => [board_id]}, _session, socket) do
+    case connected?(socket) do
+      true ->
+        PubSub.subscribe(ExChess.PubSub, "board:" <> board_id)
 
-    if found_board == [] do
-      {:ok, pid} = Core.create_board(board_id)
-      PubSub.subscribe(ExChess.PubSub, "board:" <> board_id)
-    else
-      PubSub.subscribe(ExChess.PubSub, "board:" <> board_id)
+        socket =
+          socket
+          |> assign(:page, "show_board")
+          |> assign(:board_id, board_id)
+          |> assign(:board, start_board(board_id))
+
+        {:ok, socket}
+
+      false ->
+        {:ok, assign(socket, page: "loading", board_id: nil)}
     end
-
-    sorted_board =
-      Core.set_board(board_id) |> Enum.sort_by(fn {location, _} -> location end) |> Enum.reverse()
-
-    socket =
-      socket
-      |> assign(:board_id, board_id)
-      |> assign(:board, sorted_board)
-
-    {:ok, socket}
   end
 
-  def render(assigns) do
+  def render(%{page: "show_board"} = assigns) do
     ~H"""
     <.live_component module={ExChessWeb.Boards} id={@board_id} board={@board} />
     """
   end
 
-  def handle_info({"movement", params}, socket) do
-    {:noreply, push_event(socket, "updated", params)}
+  def render(%{page: "loading"} = assigns) do
+    ~H"""
+    <h1>Loading</h1>
+    """
+  end
+
+  def handle_info({"movement", params, updated_board}, socket) do
+    display = updated_board |> Enum.sort_by(fn {location, _} -> location end, :desc)
+    socket = assign(socket, :board, display)
+    [{pid, _}] = Registry.lookup(ExChessGameRegistry, socket.assigns.board_id)
+
+
+    send(pid, {"update_backend", updated_board})
+    {:noreply, socket}
+  end
+
+  defp start_board(board_id) do
+    found_board = Registry.lookup(ExChessGameRegistry, board_id)
+
+    cond do
+      found_board == [] ->
+        {:ok, pid} = Core.create_board(board_id)
+        Core.set_board(board_id)
+
+      found_board |> Enum.empty? == false ->
+        Core.get_board(board_id)
+
+      true ->
+        raise :not_connected
+    end
+    |> Enum.sort_by(fn {location, _} -> location end, :desc)
   end
 end

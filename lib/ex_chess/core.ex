@@ -15,7 +15,7 @@ defmodule ExChess.Core do
     Board.set_board(id, "black")
   end
 
-  def create_piece(name, piece) do
-    Piece.start_link(name, piece)
+  def move_piece(id, from, to) do
+    Board.move_piece(id, from, to)
   end
 end

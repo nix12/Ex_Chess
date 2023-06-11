@@ -10,7 +10,6 @@ defmodule ExChessWeb.Boards do
             module={ExChessWeb.Square}
             id={location}
             square={square}
-            location={location}
             board_id={@id}
           />
         <% end %>
