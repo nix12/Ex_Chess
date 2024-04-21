@@ -1,30 +1,16 @@
 defmodule ExChess.Core.Pieces.Pawn do
-  @moduledoc"""
+  @moduledoc """
   Pawn struct
   """
-  defstruct [
-    :color,
-    :icon,
-    move_set: [[1, 1], [-1, 1], [-1, -1], [1, -1], [1, 0], [-1, 0], [0, 1], [0, -1]]
-  ]
+  defstruct [color: nil, icon: nil, move_set: nil, start_location: nil]
 
-  def create_piece(color) do
-    %__MODULE__{color: color}
-  end
+  def color(color), do: %__MODULE__{color: color} |> Map.get(:color)
 
-  def set_icon(piece) do
-    if piece.color == "white" do
-      Map.update!(piece, :icon, fn _ -> "&#x2659;" end)
-    else
-      Map.update!(piece, :icon, fn _ -> "&#x265F;" end)
-    end
-  end
+  def move_set(), do: [[1, 1], [-1, 1], [-1, -1], [1, -1], [1, 0], [-1, 0], [0, 1], [0, -1]]
 
-  def start_location(piece) do
-    if piece.color == "white" do
-      [[2, 1], [2, 2], [2, 3], [2, 4], [2, 5], [2, 6], [2, 7], [2, 8]]
-    else
-      [[7, 1], [7, 2], [7, 3], [7, 4], [7, 5], [7, 6], [7, 7], [7, 8]]
-    end
-  end
+  def icon(:white), do: "&#x2659;"
+  def icon(:black), do: "&#x265F;"
+
+  def start_location(:white), do: [[2, 1], [2, 2], [2, 3], [2, 4], [2, 5], [2, 6], [2, 7], [2, 8]]
+  def start_location(:black), do: [[7, 1], [7, 2], [7, 3], [7, 4], [7, 5], [7, 6], [7, 7], [7, 8]]
 end

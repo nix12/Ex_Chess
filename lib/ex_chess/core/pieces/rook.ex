@@ -1,26 +1,16 @@
 defmodule ExChess.Core.Pieces.Rook do
-  @moduledoc"""
+  @moduledoc """
   Rook struct
   """
-  defstruct [:color, :icon, move_set: [[1, 0], [-1, 0], [0, 1], [0, -1]]]
+  defstruct [color: nil, icon: nil, move_set: nil, start_location: nil]
 
-  def create_piece(color) do
-    %__MODULE__{color: color}
-  end
+  def color(color), do: %__MODULE__{color: color} |> Map.get(:color)
 
-  def set_icon(piece) do
-    if piece.color == "white" do
-      Map.update!(piece, :icon, fn _ -> "&#x2656;" end)
-    else
-      Map.update!(piece, :icon, fn _ -> "&#x265C;" end)
-    end
-  end
+  def move_set(), do: [[1, 0], [-1, 0], [0, 1], [0, -1]]
 
-  def start_location(piece) do
-    if piece.color == "white" do
-      [[1, 1], [1, 8]]
-    else
-      [[8, 1], [8, 8]]
-    end
-  end
+  def icon(:white), do: "&#x2656;"
+  def icon(:black), do: "&#x265C;"
+
+  def start_location(:white), do: [[1, 1], [1, 8]]
+  def start_location(:black), do: [[8, 1], [8, 8]]
 end

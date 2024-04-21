@@ -32,13 +32,18 @@ defmodule ExChessWeb.Square do
   server and broadcast changes.
   """
   def handle_event("reposition", params, socket) do
-    converted_params = params |> convert_values_to_list([])
-    updated_board = Core.move_piece(socket.assigns.board_id, converted_params["id"], converted_params["list_id"])
-
+    %{"id" => from, "to" => %{"list_id" => to}} = decoded_params = %{params | 
+      "id" => Jason.decode!(params["id"]), 
+      "to" => %{params["to"] | 
+        "list_id" => Jason.decode!(params["to"]["list_id"])
+      }
+    }
+    updated_board = Core.move_piece(socket.assigns.board_id, from, to)
+        
     PubSub.broadcast(
       ExChess.PubSub,
       "board:" <> socket.assigns.board_id,
-      {"movement", converted_params, updated_board}
+      {"movement", decoded_params, updated_board}
     )
 
     {:noreply, socket}
@@ -53,35 +58,5 @@ defmodule ExChessWeb.Square do
     else
       "bg-white"
     end
-  end
-
-  defp convert_values_to_list([], acc), do: acc |> Enum.into(%{})
-
-  defp convert_values_to_list([{k, v} | tail], acc) when v |> is_map() do
-    [{_k2, v2} = h2 | _t2] = v |> Map.to_list()
-
-    convert_values_to_list(v, [h2 | acc])
-  end
-
-  defp convert_values_to_list(params, acc) when params |> is_map() do
-    [{k, v} | tail] = params |> Map.to_list()
-
-    if v == "squares" or v |> is_integer() do
-      convert_values_to_list(tail, [{k, v} | acc])
-    else
-      convert_values_to_list(tail, [{k, Jason.decode!(v)} | acc])
-    end
-  end
-
-  defp convert_values_to_list([{k, v} | tail] = params, acc) when params |> is_list() do
-    if v == "squares" or v |> is_integer() do
-      convert_values_to_list(tail, [{k, v} | acc])
-    else
-      convert_values_to_list(tail, [{k, Jason.decode!(v)} | acc])
-    end
-  end
-
-  defp convert_values_to_list([{k, v} | tail], acc) do
-    convert_values_to_list(tail, [{k, v} | acc])
   end
 end

@@ -2,8 +2,7 @@ defmodule ExChess.Core do
   @moduledoc"""
   Contains functions for core of the chess application.
   """
-  alias ExChess.Core.Boards.Board
-  alias ExChess.Core.Pieces.{Piece, Rook}
+  alias ExChess.Core.Board
 
   @doc"""
   Takes an ID to create a unique chess board.
@@ -22,9 +21,9 @@ defmodule ExChess.Core do
   @doc"""
   Setup both sides of identified board.
   """
-  def set_board(id) do
-    Board.set_board(id, "white")
-    Board.set_board(id, "black")
+  def setup_board(id) do
+    Board.setup_board(id, :white)
+    Board.setup_board(id, :black)
   end
 
   @doc"""

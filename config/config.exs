@@ -7,6 +7,12 @@
 # General application configuration
 import Config
 
+# config :ex_chess, ExChess.Repo,
+#   database: "ex_chess_repo",
+#   username: "user",
+#   password: "pass",
+#   hostname: "localhost"
+
 config :ex_chess,
   ecto_repos: [ExChess.Repo]
 

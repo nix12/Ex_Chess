@@ -11,12 +11,12 @@ defmodule ExChessWeb.BoardLive.Show do
     case connected?(socket) do
       true ->
         PubSub.subscribe(ExChess.PubSub, "board:" <> board_id)
-
+        
         socket =
           socket
-          |> assign(:page, "show_board")
+          |> assign(:page, "show_game")
           |> assign(:board_id, board_id)
-          |> assign(:board, start_board(board_id))
+          |> assign(:board, start_game(board_id))
 
         {:ok, socket}
 
@@ -25,7 +25,7 @@ defmodule ExChessWeb.BoardLive.Show do
     end
   end
 
-  def render(%{page: "show_board"} = assigns) do
+  def render(%{page: "show_game"} = assigns) do
     ~H"""
     <.live_component module={ExChessWeb.Boards} id={@board_id} board={@board} />
     """
@@ -45,8 +45,7 @@ defmodule ExChessWeb.BoardLive.Show do
     socket = assign(socket, :board, display)
     [{pid, _}] = Registry.lookup(ExChessGameRegistry, socket.assigns.board_id)
 
-
-    send(pid, {"update_backend", updated_board})
+    send(pid, {"update_board", updated_board})
     {:noreply, socket}
   end
 
@@ -56,13 +55,15 @@ defmodule ExChessWeb.BoardLive.Show do
   Then sort board for display.
   Raise if board not connected to socket.
   """
-  defp start_board(board_id) do
+  defp start_game(board_id) do
     found_board = Registry.lookup(ExChessGameRegistry, board_id)
 
     cond do
       found_board == [] ->
-        {:ok, pid} = Core.create_board(board_id)
-        Core.set_board(board_id)
+        with {:ok, _pid} <- Core.create_board(board_id),
+              _ <- Core.setup_board(board_id) do
+          Core.get_board(board_id)
+        end
 
       found_board |> Enum.empty? == false ->
         Core.get_board(board_id)
