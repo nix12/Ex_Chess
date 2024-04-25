@@ -2,34 +2,28 @@ defmodule ExChess.Core do
   @moduledoc"""
   Contains functions for core of the chess application.
   """
-  alias ExChess.Core.Board
+  alias ExChess.Core.{Engine, Board}
 
-  @doc"""
-  Takes an ID to create a unique chess board.
+  @doc """
+  Start new game.
   """
-  def create_board(id) do
-    Board.start_link(id)
+  def new_game(game_id, new_board) do
+    Engine.new(game_id, new_board)
   end
 
-  @doc"""
-  Get current state of identified chess board.
-  """
-  def get_board(id) do
-    Board.get_board(id)
-  end
-
-  @doc"""
+  @doc """
   Setup both sides of identified board.
   """
-  def setup_board(id) do
-    Board.setup_board(id, :white)
-    Board.setup_board(id, :black)
+  def build_board() do
+    Board.new()
+    |> Board.setup_board(:white)
+    |> Board.setup_board(:black)
   end
 
-  @doc"""
+  @doc """
   Move piece on identified board from one square to another.
   """
-  def move_piece(id, from, to) do
-    Board.move_piece(id, from, to)
+  def move_piece(board, from, to) do
+    Board.move(board, from, to)
   end
 end

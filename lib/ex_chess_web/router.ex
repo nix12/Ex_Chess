@@ -72,7 +72,7 @@ defmodule ExChessWeb.Router do
       live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
 
-      live "/board/*board_id", BoardLive.Show, :show
+      live "/game/*game_id", GameLive.Show, :show
     end
   end
 

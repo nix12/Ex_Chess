@@ -2,7 +2,7 @@ defmodule ExChess.Core.Pieces.Piece do
   @moduledoc """
   Contains functions for building a chess piece.
   """
-  alias ExChess.Core.Pieces.{Pawn, Rook, Knight, Bishop, Queen, King}
+  # alias ExChess.Core.Pieces.{Pawn, Rook, Knight, Bishop, Queen, King}
 
   def new(type, color) do
     struct(type, [

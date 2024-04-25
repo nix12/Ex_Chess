@@ -21,9 +21,7 @@ defmodule ExChess.Application do
       # Start a worker by calling: ExChess.Worker.start_link(arg)
       # {ExChess.Worker, arg}
 
-      # Start Registries
-      {Registry, keys: :unique, name: ExChessGameRegistry},
-      {Registry, keys: :duplicate, name: ExChessMechanicsRegistry}
+      ExChessWeb.Presence
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
