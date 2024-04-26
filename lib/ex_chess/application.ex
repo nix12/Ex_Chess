@@ -14,14 +14,14 @@ defmodule ExChess.Application do
       ExChess.Repo,
       # Start the PubSub system
       {Phoenix.PubSub, name: ExChess.PubSub},
-      # Start Finch
-      {Finch, name: ExChess.Finch},
+      # Tracking System
+      ExChessWeb.Presence,
       # Start the Endpoint (http/https)
       ExChessWeb.Endpoint,
+      # Start Finch
+      {Finch, name: ExChess.Finch},
       # Start a worker by calling: ExChess.Worker.start_link(arg)
       # {ExChess.Worker, arg}
-
-      ExChessWeb.Presence
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

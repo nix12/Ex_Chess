@@ -4,8 +4,6 @@ defmodule ExChessWeb.Square do
   """
   use ExChessWeb, :live_component
 
-  alias ExChess.Core
-
   def render(assigns) do
     ~H"""
     <div
@@ -41,8 +39,7 @@ defmodule ExChessWeb.Square do
         }
     }
 
-    updated_board = Core.move_piece(socket.assigns.game.board, from, to)
-    socket = assign(socket, %{game: %{board: updated_board}})
+    updated_board = ExChess.Core.move_piece(socket.assigns.board, from, to)
 
     send(self(), {"broadcast_move", updated_board})
 

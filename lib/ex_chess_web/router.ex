@@ -3,14 +3,13 @@ defmodule ExChessWeb.Router do
 
   import ExChessWeb.UserAuth
 
-
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_live_flash
     plug :put_root_layout, {ExChessWeb.Layouts, :root}
     plug :protect_from_forgery
-    plug :put_secure_browser_headers, %{"content-security-policy" => "default-src 'self'"}
+    # plug :put_secure_browser_headers, %{"content-security-policy" => "default-src 'self'"}
     plug :put_secure_browser_headers
     plug :fetch_current_user
     plug :put_user_token
@@ -35,7 +34,7 @@ defmodule ExChessWeb.Router do
   if Application.compile_env(:ex_chess, :dev_routes) do
     # If you want to use the LiveDashboard in production, you should put
     # it behind authentication and allow only admins to access it.
-    # If your application does not have an admins-only section yet,
+    # If your application does not hmountedave an admins-only section yet,
     # you can use Plug.BasicAuth to set up some basic authentication
     # as long as you are also using SSL (which you should anyway).
     import Phoenix.LiveDashboard.Router
@@ -72,7 +71,7 @@ defmodule ExChessWeb.Router do
       live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
 
-      live "/game/*game_id", GameLive.Show, :show
+      live "/game/*game_id", GameLive.Show
     end
   end
 

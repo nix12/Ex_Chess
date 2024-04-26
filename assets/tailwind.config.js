@@ -30,7 +30,7 @@ module.exports = {
     plugin(({addVariant}) => addVariant("phx-submit-loading", [".phx-submit-loading&", ".phx-submit-loading &"])),
     plugin(({addVariant}) => addVariant("phx-change-loading", [".phx-change-loading&", ".phx-change-loading &"])),
 
-    // Embeds Hero Icons (https://heroicons.com) into your app.css bundle
+    // EmbContent-Security-Policy: The page’s settings blocked an inline script (script-src-elem) from being executed because it violates the following directive: “default-src 'self'”eds Hero Icons (https://heroicons.com) into your app.css bundle
     // See your `CoreComponents.icon/1` for more information.
     //
     plugin(function({matchComponents, theme}) {

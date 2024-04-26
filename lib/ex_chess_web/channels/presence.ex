@@ -25,7 +25,7 @@ defmodule ExChessWeb.Presence do
     for {user_id, presence} <- joins do
       user_data = %{id: user_id, user: presence.user, metas: Map.fetch!(presences, user_id)}
       msg = {__MODULE__, {:join, user_data}}
-      Phoenix.PubSub.local_broadcast(ExChess.PubSub, "proxy:#{topic}", msg)
+      Phoenix.PubSub.local_broadcast(ExChess.PubSub, "game:#{topic}", msg)
     end
 
     for {user_id, presence} <- leaves do
@@ -37,15 +37,15 @@ defmodule ExChessWeb.Presence do
 
       user_data = %{id: user_id, user: presence.user, metas: metas}
       msg = {__MODULE__, {:leave, user_data}}
-      Phoenix.PubSub.local_broadcast(ExChess.PubSub, "proxy:#{topic}", msg)
+      Phoenix.PubSub.local_broadcast(ExChess.PubSub, "game:#{topic}", msg)
     end
 
     {:ok, state}
   end
 
-  def list_online_users(), do: list("online_users") |> Enum.map(fn {_id, presence} -> presence end)
+  def list_online_users(game_id), do: list(game_id) |> Enum.map(fn {_id, presence} -> presence end)
 
-  def track_user(name, params), do: track(self(), "online_users", name, params)
+  def track_user(game_id, name, params), do: track(self(), game_id, name, params)
 
-  def subscribe(), do: Phoenix.PubSub.subscribe(ExChess.PubSub, "proxy:online_users")
+  def subscribe(game_id), do: Phoenix.PubSub.subscribe(ExChess.PubSub, "game:" <> game_id)
 end

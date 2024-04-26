@@ -38,4 +38,12 @@ defmodule ExChess.Core.Board do
     
     %{board | from => nil, to => occupant}
   end
+
+  def legal_move?(board, piece) do
+    
+  end
+  
+  def generate_move_list(board, piece) do
+    
+  end
 end

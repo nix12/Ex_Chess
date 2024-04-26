@@ -8,40 +8,50 @@ defmodule ExChessWeb.GameLive.Show do
   alias ExChess.Core
 
   def mount(_params, _session, socket) do
-    if connected?(socket) do
+  if connected?(socket) do
       current_user = socket.assigns[:current_user]
-      # generate_game_id()
-      game_id = "asdf"
+      game_id = "asdf" # generate_game_id()
 
-      # ExChessWeb.Presence.track_user(params["name"], %{id: params["name"]})
-      ExChessWeb.Presence.track_user(current_user.email, %{id: current_user.email})
-      ExChessWeb.Presence.subscribe()
+      ExChessWeb.Presence.track_user(game_id, current_user.email, %{id: current_user.email})
+      ExChessWeb.Presence.subscribe(game_id)
       
       socket =
         socket
-        # |> stream(:presences, [])
+        |> stream(:presences, ExChessWeb.Presence.list_online_users(game_id))
         |> assign(page: "show_game")
         |> assign(game_id: game_id)
-        |> assign(game: Core.new_game(game_id, Core.build_board()))
-        |> stream(:presences, ExChessWeb.Presence.list_online_users())
+        |> assign(board: Core.build_board())
+        |> assign(game: Core.new_game(game_id))
 
       {:ok, socket}
 
     else
-      {:ok, assign(socket, page: "loading", game_id: nil)}
+      socket =
+        socket
+        |> stream(:presences, [])
+        |> assign(page: "loading", game_id: nil)
+
+      {:ok, socket}
     end
   end
 
   def render(%{page: "show_game"} = assigns) do
     ~H"""
     <div>
-      <.live_component 
-        module={ExChessWeb.Board} 
+      <ExChessWeb.Board.chessboard
         id={@game_id} 
-        display={display(@game)} 
+        display={display(@board)} 
         game={@game}
+        board={@board}
       />
 
+      <div>
+        <h4>Current User</h4>
+        <span>
+          <%= @current_user.email %>
+        </span>
+      </div>
+      <div><h4>Online User</h4></div>
       <ul id="online_users" phx-update="stream">
         <li :for={{dom_id, %{id: id, metas: metas}} <- @streams.presences} id={dom_id}><%= id %> (<%= length(metas) %>)</li>
       </ul>
@@ -70,8 +80,8 @@ defmodule ExChessWeb.GameLive.Show do
   @doc """
   Broadcast movement of positions to all connected users.
   """
-  def handle_info({"broadcast_move", updated_board}, socket) do
-    PubSub.broadcast(
+  def handle_info({"broadcast_move", updated_board}, socket) do 
+    PubSub.broadcast!(
       ExChess.PubSub,
       "game:" <> socket.assigns[:game_id],
       {"update_board", updated_board}
@@ -81,11 +91,17 @@ defmodule ExChessWeb.GameLive.Show do
   end
 
   @doc """
-  Handles the update of the current state of chess board
+  Handles the update of the current state of chessboard
   """
   def handle_info({"update_board", updated_board}, socket) do
-    IO.puts("===BROADCAST===")
-    {:noreply, assign(socket, %{game: %{board: updated_board}})}
+    IO.puts("===UPDATE ALL===")
+    # socket = update_in(
+    #   socket, 
+    #   [Access.key!(:assigns), :game, Access.key!(:board)], 
+    #   fn _ -> updated_board end
+    # )
+    
+    {:noreply, assign(socket, board: updated_board)}
   end
 
   defp generate_game_id() do
@@ -94,7 +110,7 @@ defmodule ExChessWeb.GameLive.Show do
     :crypto.strong_rand_bytes(length) |> Base.encode64 |> binary_part(0, length)
   end
 
-  defp display(game) do
-    game.board |> Enum.sort_by(fn {location, _} -> location end, :desc)
+  defp display(board) do
+    board |> Enum.sort_by(fn {location, _} -> location end, :desc)
   end
 end

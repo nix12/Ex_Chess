@@ -7,8 +7,8 @@ defmodule ExChess.Core do
   @doc """
   Start new game.
   """
-  def new_game(game_id, new_board) do
-    Engine.new(game_id, new_board)
+  def new_game(game_id) do
+    Engine.new(game_id)
   end
 
   @doc """
