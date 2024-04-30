@@ -34,7 +34,9 @@ defmodule ExChessWeb.Square do
   server and broadcast changes.
   """
   def handle_event("reposition", params, socket) do
-    %{"id" => from, "to" => %{"list_id" => to}} = Jason.decode!(params)
+    %{"id" => from, "to" => %{"list_id" => to}} = params
+    from = Jason.decode!(from)
+    to = Jason.decode!(to)
     updated_board = Core.move_piece(socket.assigns.board, from, to)
 
     send(self(), {"broadcast_move", updated_board})
