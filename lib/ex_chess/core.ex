@@ -7,8 +7,8 @@ defmodule ExChess.Core do
   @doc """
   Start new game.
   """
-  def new_game(game_id) do
-    Engine.new(game_id)
+  def new_game() do
+    Engine.new()
   end
 
   @doc """
@@ -26,4 +26,12 @@ defmodule ExChess.Core do
   def move_piece(board, from, to) do
     Board.move(board, from, to)
   end
+
+  def generate_list(square) do
+    Board.generate_move_list(square)
+  end
+
+  def check_bounds(moves_list) do
+    Board.check_out_of_bounds(moves_list)
+  end 
 end

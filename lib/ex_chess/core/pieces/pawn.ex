@@ -6,7 +6,7 @@ defmodule ExChess.Core.Pieces.Pawn do
 
   def color(color), do: %__MODULE__{color: color} |> Map.get(:color)
 
-  def move_set(), do: [[1, 1], [-1, 1], [-1, -1], [1, -1], [1, 0], [-1, 0], [0, 1], [0, -1]]
+  def move_set(), do: [[1, 1], [-1, 1], [-1, -1], [1, -1], [1, 0], [-1, 0]]
 
   def icon(:white), do: "&#x2659;"
   def icon(:black), do: "&#x265F;"

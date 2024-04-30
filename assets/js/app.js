@@ -48,6 +48,30 @@ Hooks.Sortable = {
   }
 }
 
+// Highlights path of available moves.
+Hooks.Highlight = {
+  mounted() {    
+    pushEvent = () => this.pushEventTo(this.el, "highlight", this.el.id)
+    throttle = _.throttle(pushEvent, 200)
+    this.el.addEventListener("mousedown", throttle)
+    this.el.addEventListener("mouseup", e => {
+      let squares = document.querySelectorAll("[data-group='squares']")
+
+      squares.forEach(square => {
+        square.classList.remove("!bg-violet-300")
+      });
+    })
+
+    this.handleEvent(`highlight_moves_${this.el.parentNode.id}`, moves_list => {
+      moves_list["available_moves"].forEach(location => {
+        let move = document.querySelector(`[id='[${location}]']`)
+
+        move.classList.add("!bg-violet-300")
+      });
+    })
+  }
+}
+
 let liveSocket = new LiveSocket("/live", Socket, {params: {_csrf_token: csrfToken}, hooks: Hooks})
 
 // Show progress bar on live navigation and form submits

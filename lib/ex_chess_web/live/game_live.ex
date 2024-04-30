@@ -21,7 +21,7 @@ defmodule ExChessWeb.GameLive.Show do
         |> assign(page: "show_game")
         |> assign(game_id: game_id)
         |> assign(board: Core.build_board())
-        |> assign(game: Core.new_game(game_id))
+        |> assign(game: Core.new_game())
 
       {:ok, socket}
 
@@ -95,11 +95,6 @@ defmodule ExChessWeb.GameLive.Show do
   """
   def handle_info({"update_board", updated_board}, socket) do
     IO.puts("===UPDATE ALL===")
-    # socket = update_in(
-    #   socket, 
-    #   [Access.key!(:assigns), :game, Access.key!(:board)], 
-    #   fn _ -> updated_board end
-    # )
     
     {:noreply, assign(socket, board: updated_board)}
   end

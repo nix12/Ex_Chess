@@ -12,7 +12,7 @@ defmodule ExChess.Core.Engine do
   ]
   
 
-  def new(game_id) do
+  def new() do
     %__MODULE__{
       players: [],
       current_turn: nil,
