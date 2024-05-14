@@ -1,10 +1,10 @@
 defmodule ExChessWeb.Board do
-  @moduledoc"""
+  @moduledoc """
   Chess board live component.
   """
-  use ExChessWeb, :html
+  use ExChessWeb, :live_component
  
-  def chessboard(assigns) do
+  def render(assigns) do
     ~H"""
     <div class="flex flex-row bg-blue-300 h-80 w-80 justify-center items-center">
       <div class="grid grid-cols-8 grid-rows-8 gap-0 hover:cursor-pointer">
@@ -15,6 +15,7 @@ defmodule ExChessWeb.Board do
             square={square}
             game_id={@id}
             game={@game}
+            current_user={@current_user}
             board={@board}
           />
         <% end %>

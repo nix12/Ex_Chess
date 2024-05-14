@@ -24,8 +24,6 @@ import topbar from "../vendor/topbar"
 import Sortable from "../vendor/sortable"
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
-
-// Sortable
 let Hooks = {};
 
 // Contains Hook for drag and drop functionality.
@@ -51,9 +49,10 @@ Hooks.Sortable = {
 // Highlights path of available moves.
 Hooks.Highlight = {
   mounted() {    
-    pushEvent = () => this.pushEventTo(this.el, "highlight", this.el.id)
-    throttle = _.throttle(pushEvent, 200)
-    this.el.addEventListener("mousedown", throttle)
+    this.el.addEventListener("mousedown",  () => {
+      this.pushEventTo(this.el, "highlight", this.el.id)}
+    )
+    
     this.el.addEventListener("mouseup", e => {
       let squares = document.querySelectorAll("[data-group='squares']")
 
@@ -63,7 +62,7 @@ Hooks.Highlight = {
     })
 
     this.handleEvent(`highlight_moves_${this.el.parentNode.id}`, moves_list => {
-      moves_list["available_moves"].forEach(location => {
+      moves_list["legal_moves"].forEach(location => {
         let move = document.querySelector(`[id='[${location}]']`)
 
         move.classList.add("!bg-violet-300")

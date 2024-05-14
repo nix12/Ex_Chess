@@ -11,36 +11,40 @@ defmodule ExChess.Accounts do
   ## Database getters
 
   @doc """
-  Gets a user by email.
+  Gets a user by username.
 
   ## Examples
 
-      iex> get_user_by_email("foo@example.com")
+      iex> get_user_by_username("foo@example.com")
       %User{}
 
-      iex> get_user_by_email("unknown@example.com")
+      iex> get_user_by_username("unknown@example.com")
       nil
 
   """
+  def get_user_by_username(username) when is_binary(username) do
+    Repo.get_by(User, username: username)
+  end
+
   def get_user_by_email(email) when is_binary(email) do
     Repo.get_by(User, email: email)
   end
 
   @doc """
-  Gets a user by email and password.
+  Gets a user by username and password.
 
   ## Examples
 
-      iex> get_user_by_email_and_password("foo@example.com", "correct_password")
+      iex> get_user_by_username_and_password("foo@example.com", "correct_password")
       %User{}
 
-      iex> get_user_by_email_and_password("foo@example.com", "invalid_password")
+      iex> get_user_by_username_and_password("foo@example.com", "invalid_password")
       nil
 
   """
-  def get_user_by_email_and_password(email, password)
-      when is_binary(email) and is_binary(password) do
-    user = Repo.get_by(User, email: email)
+  def get_user_by_username_and_password(username, password)
+      when is_binary(username) and is_binary(password) do
+    user = Repo.get_by(User, username: username)
     if User.valid_password?(user, password), do: user
   end
 
@@ -90,37 +94,48 @@ defmodule ExChess.Accounts do
 
   """
   def change_user_registration(%User{} = user, attrs \\ %{}) do
-    User.registration_changeset(user, attrs, hash_password: false, validate_email: false)
+    User.registration_changeset(user, attrs, hash_password: false, validate_username: false)
   end
 
   ## Settings
 
   @doc """
-  Returns an `%Ecto.Changeset{}` for changing the user email.
+  Returns an `%Ecto.Changeset{}` for changing the user username.
 
   ## Examples
 
-      iex> change_user_email(user)
+      iex> change_user_username(user)
       %Ecto.Changeset{data: %User{}}
 
   """
+  def change_user_username(user, attrs \\ %{}) do
+    User.username_changeset(user, attrs, validate_username: false)
+  end
+
   def change_user_email(user, attrs \\ %{}) do
-    User.email_changeset(user, attrs, validate_email: false)
+    User.username_changeset(user, attrs, validate_email: false)
   end
 
   @doc """
-  Emulates that the email will change without actually changing
+  Emulates that the username will change without actually changing
   it in the database.
 
   ## Examples
 
-      iex> apply_user_email(user, "valid password", %{email: ...})
+      iex> apply_user_username(user, "valid password", %{username: ...})
       {:ok, %User{}}
 
-      iex> apply_user_email(user, "invalid password", %{email: ...})
+      iex> apply_user_username(user, "invalid password", %{username: ...})
       {:error, %Ecto.Changeset{}}
 
   """
+  def apply_user_username(user, password, attrs) do
+    user
+    |> User.username_changeset(attrs)
+    |> User.validate_current_password(password)
+    |> Ecto.Changeset.apply_action(:update)
+  end
+
   def apply_user_email(user, password, attrs) do
     user
     |> User.email_changeset(attrs)
@@ -146,10 +161,10 @@ defmodule ExChess.Accounts do
     end
   end
 
-  defp user_email_multi(user, email, context) do
+  defp user_email_multi(user, username, context) do
     changeset =
       user
-      |> User.email_changeset(%{email: email})
+      |> User.email_changeset(%{username: username})
       |> User.confirm_changeset()
 
     Ecto.Multi.new()
@@ -158,20 +173,20 @@ defmodule ExChess.Accounts do
   end
 
   @doc ~S"""
-  Delivers the update email instructions to the given user.
+  Delivers the update username instructions to the given user.
 
   ## Examples
 
-      iex> deliver_user_update_email_instructions(user, current_email, &url(~p"/users/settings/confirm_email/#{&1})")
+      iex> deliver_user_update_username_instructions(user, current_username, &url(~p"/users/settings/confirm_username/#{&1})")
       {:ok, %{to: ..., body: ...}}
 
   """
-  def deliver_user_update_email_instructions(%User{} = user, current_email, update_email_url_fun)
-      when is_function(update_email_url_fun, 1) do
-    {encoded_token, user_token} = UserToken.build_email_token(user, "change:#{current_email}")
+  def deliver_user_update_email_instructions(%User{} = user, current_username, update_username_url_fun)
+      when is_function(update_username_url_fun, 1) do
+    {encoded_token, user_token} = UserToken.build_email_token(user, "change:#{current_username}")
 
     Repo.insert!(user_token)
-    UserNotifier.deliver_update_email_instructions(user, update_email_url_fun.(encoded_token))
+    UserNotifier.deliver_update_email_instructions(user, update_username_url_fun.(encoded_token))
   end
 
   @doc """
@@ -245,7 +260,7 @@ defmodule ExChess.Accounts do
   ## Confirmation
 
   @doc ~S"""
-  Delivers the confirmation email instructions to the given user.
+  Delivers the confirmation username instructions to the given user.
 
   ## Examples
 
@@ -292,7 +307,7 @@ defmodule ExChess.Accounts do
   ## Reset password
 
   @doc ~S"""
-  Delivers the reset password email to the given user.
+  Delivers the reset password username to the given user.
 
   ## Examples
 
@@ -349,5 +364,25 @@ defmodule ExChess.Accounts do
       {:ok, %{user: user}} -> {:ok, user}
       {:error, :user, changeset, _} -> {:error, changeset}
     end
+  end
+
+  @doc """
+  Update user by username.
+  """
+  def update_user_by_username(username, options) do
+    %User{} = user = get_user_by_username(username)
+    changeset = Ecto.Changeset.change(user, options)
+
+    Repo.update(changeset)
+  end
+
+  @doc """
+  Update user.
+  """
+  def update_user(id, options) do
+    %User{} = user = get_user!(id)
+    changeset = Ecto.Changeset.change(user, options)
+
+    Repo.update(changeset)
   end
 end

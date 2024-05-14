@@ -30,21 +30,52 @@ defmodule ExChess.Core.Board do
       square
     end
   end
+
+  def get_location(board, current_location) do
+    Enum.find(board, fn {location, _} -> current_location == location end)
+  end
   
-  def move(board, from, to) do
+  
+  def move(player, board, from, to) do
     {_, occupant} = square = Enum.find(board, fn {location, _occupant} -> 
       location == from 
     end) 
     
-    square
-    |> generate_move_list()
-
-
-    %{board | from => nil, to => occupant}
+    IO.inspect(legal_moves(player, board, available_moves(square)), label: "LEGAL")
+    IO.inspect(to, label: "TO")
+      
+    if to in legal_moves(player, board, available_moves(square)) do
+      %{board | from => nil, to => occupant}
+    else
+      raise :illegal_move
+    end
   end
 
-  def legal_move?(board, piece) do
-    
+  def available_moves(square) do
+    square
+    |> generate_move_list()
+    |> check_out_of_bounds()
+  end
+
+  def legal_moves(player, board, moves_list) do
+    for move <- moves_list, into: [] do
+      {location, occupant} = get_location(board, move)
+
+      case occupant do
+        occupant when occupant.color == player.color ->
+          nil
+
+        occupant when occupant.color != player.color ->
+          location
+          
+        nil ->
+          location
+
+        _ -> 
+          nil
+      end
+    end
+    |> Enum.reject(&is_nil/1)
   end
   
   def generate_move_list({[location_x, location_y], occupant}) do

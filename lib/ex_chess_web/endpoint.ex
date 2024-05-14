@@ -1,6 +1,6 @@
 defmodule ExChessWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :ex_chess
-
+  
   # The session will be stored in the cookie and signed,
   # this means its contents can be read but not tampered with.
   # Set :encryption_salt if you would also like to encrypt it.
@@ -10,6 +10,8 @@ defmodule ExChessWeb.Endpoint do
     signing_salt: "6oGnmX9b",
     same_site: "Lax"
   ]
+
+  socket("/live", Phoenix.LiveView.Socket, websocket: [transport_log: :debug, connect_info: [session: @session_options]])
 
   # Serve at "/" the static files from "priv/static" directory.
   #
@@ -49,6 +51,4 @@ defmodule ExChessWeb.Endpoint do
   plug(Plug.Head)
   plug(Plug.Session, @session_options)
   plug(ExChessWeb.Router)
-
-  socket("/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]])
 end

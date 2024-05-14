@@ -1,5 +1,5 @@
 defmodule ExChessWeb.Square do
-  @moduledoc"""
+  @moduledoc """
   Render chess board squares.
   """
   use ExChessWeb, :live_component
@@ -37,8 +37,29 @@ defmodule ExChessWeb.Square do
     %{"id" => from, "to" => %{"list_id" => to}} = params
     from = Jason.decode!(from)
     to = Jason.decode!(to)
-    updated_board = Core.move_piece(socket.assigns.board, from, to)
+    current_user = socket.assigns.current_user
+    [player, opponent] = socket.assigns.game.players |> IO.inspect(label: "MOVE GAME")
+    board = socket.assigns.board
+    players = [player.id, opponent.id]
 
+    updated_board = 
+      cond do
+        current_user.id == player.id ->
+          Core.move_piece(player, board, from, to)
+
+        current_user.id == opponent.id ->
+          Core.move_piece(opponent, board, from, to)
+
+        true ->
+          raise :player_not_eligible
+      end
+
+      if current_user.id in players do
+        Core.move_piece(player, board, from, to)
+      else
+        Core.move_piece(opponent, board, from, to)
+      end
+    
     send(self(), {"broadcast_move", updated_board})
 
     {:noreply, socket}
@@ -48,15 +69,13 @@ defmodule ExChessWeb.Square do
     <<x::8, y::8, _::8, type::binary>> = Jason.decode!(params) 
     type = type |> String.to_existing_atom()
     location = [x, y]
+    current_user = socket.assigns.current_user
+    board = socket.assigns.board
 
-    available_moves = 
-      {location, type}
-      |> Core.generate_list()
-      |> IO.inspect(label: "FULL MOVES")
-      |> Core.check_bounds()
-      |> IO.inspect(label: "MOVES")
+    available_moves = {location, type} |> Core.available_moves() |> IO.inspect(label: "{===AVAILABLE MOVES===}")
+    legal_moves = Core.legal_moves(current_user, board, available_moves) |> IO.inspect(label: "{===LEGAL MOVES===}")
 
-    {:noreply, push_event(socket, "highlight_moves_#{Jason.encode!(location)}", %{available_moves: available_moves})}
+    {:noreply, push_event(socket, "highlight_moves_#{Jason.encode!(location)}", %{legal_moves: legal_moves})}
   end
   
   # Colors chess boards alternating squares

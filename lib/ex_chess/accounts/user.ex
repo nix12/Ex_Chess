@@ -3,10 +3,12 @@ defmodule ExChess.Accounts.User do
   import Ecto.Changeset
 
   schema "users" do
+    field :username, :string
     field :email, :string
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
+    field :status, Ecto.Enum, values: [:offline, :online, :searching, :ingame, :watching]
 
     timestamps()
   end
@@ -36,9 +38,17 @@ defmodule ExChess.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password])
+    |> cast(attrs, [:username, :email, :password])
+    |> validate_username(opts)
     |> validate_email(opts)
     |> validate_password(opts)
+  end
+
+  defp validate_username(changeset, opts) do
+    changeset
+    |> validate_required([:username])
+    |> validate_length(:username, max: 20)
+    |> maybe_validate_unique_username(opts)
   end
 
   defp validate_email(changeset, opts) do
@@ -77,6 +87,16 @@ defmodule ExChess.Accounts.User do
     end
   end
 
+  defp maybe_validate_unique_username(changeset, opts) do
+    if Keyword.get(opts, :validate_username, true) do
+      changeset
+      |> unsafe_validate_unique(:username, ExChess.Repo)
+      |> unique_constraint(:username)
+    else
+      changeset
+    end
+  end
+
   defp maybe_validate_unique_email(changeset, opts) do
     if Keyword.get(opts, :validate_email, true) do
       changeset
@@ -92,6 +112,16 @@ defmodule ExChess.Accounts.User do
 
   It requires the email to change otherwise an error is added.
   """
+  def username_changeset(user, attrs, opts \\ []) do
+    user
+    |> cast(attrs, [:username])
+    |> validate_email(opts)
+    |> case do
+      %{changes: %{username: _}} = changeset -> changeset
+      %{} = changeset -> add_error(changeset, :username, "did not change")
+    end
+  end
+
   def email_changeset(user, attrs, opts \\ []) do
     user
     |> cast(attrs, [:email])

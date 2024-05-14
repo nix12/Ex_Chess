@@ -25,6 +25,7 @@ defmodule ExChessWeb.Router do
     get "/", PageController, :home
   end
 
+
   # Other scopes may use custom stacks.
   # scope "/api", ExChessWeb do
   #   pipe_through :api
@@ -67,11 +68,11 @@ defmodule ExChessWeb.Router do
     pipe_through [:browser, :require_authenticated_user]
 
     live_session :require_authenticated_user,
-      on_mount: [{ExChessWeb.UserAuth, :ensure_authenticated}] do
+      on_mount: {ExChessWeb.UserAuth, :ensure_authenticated} do
       live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
 
-      live "/game/*game_id", GameLive.Show
+      live "/lobby", LobbyLive
     end
   end
 
@@ -84,6 +85,8 @@ defmodule ExChessWeb.Router do
       on_mount: [{ExChessWeb.UserAuth, :mount_current_user}] do
       live "/users/confirm/:token", UserConfirmationLive, :edit
       live "/users/confirm", UserConfirmationInstructionsLive, :new
+
+      live "/game/:game_id", GameLive
     end
   end
 
