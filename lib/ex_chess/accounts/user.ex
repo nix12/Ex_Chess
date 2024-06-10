@@ -2,6 +2,10 @@ defmodule ExChess.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias ExChess.Core.Game
+
+  @primary_key {:id, Ecto.UUID, autogenerate: true}
+
   schema "users" do
     field :username, :string
     field :email, :string
@@ -9,6 +13,8 @@ defmodule ExChess.Accounts.User do
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
     field :status, Ecto.Enum, values: [:offline, :online, :searching, :ingame, :watching]
+
+    has_many :games, Game
 
     timestamps()
   end

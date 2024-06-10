@@ -25,7 +25,7 @@ defmodule ExChessWeb.Presence do
     for {user_id, presence} <- joins do
       user_data = %{id: user_id, user: presence.user, metas: Map.fetch!(presences, user_id)}
       msg = {__MODULE__, {:join, user_data}}
-      Phoenix.PubSub.local_broadcast(ExChess.PubSub, "lobby:#{topic}", msg)
+      Phoenix.PubSub.local_broadcast(ExChess.PubSub, "game:#{topic}", msg)
     end
 
     for {user_id, presence} <- leaves do
@@ -37,41 +37,15 @@ defmodule ExChessWeb.Presence do
 
       user_data = %{id: user_id, user: presence.user, metas: metas}
       msg = {__MODULE__, {:leave, user_data}}
-      Phoenix.PubSub.local_broadcast(ExChess.PubSub, "lobby:#{topic}", msg)
-    end
-
-    {:ok, state}
-  end
-
-  def handle_metas("G-" <> game_id, %{joins: joins, leaves: leaves}, presences, state) do
-    for {user_id, presence} <- joins do
-      user_data = %{id: user_id, user: presence.user, metas: Map.fetch!(presences, user_id)}
-      msg = {__MODULE__, {:join, user_data}}
-      Phoenix.PubSub.local_broadcast(ExChess.PubSub, "game:#{game_id}", msg)
-    end
-
-    for {user_id, presence} <- leaves do
-      metas =
-        case Map.fetch(presences, user_id) do
-          {:ok, presence_metas} -> presence_metas
-          :error -> []
-        end
-
-      user_data = %{id: user_id, user: presence.user, metas: metas}
-      msg = {__MODULE__, {:leave, user_data}}
-      Phoenix.PubSub.local_broadcast(ExChess.PubSub, "game:#{game_id}", msg)
+      Phoenix.PubSub.local_broadcast(ExChess.PubSub, "game:#{topic}", msg)
     end
 
     {:ok, state}
   end
 
   def list_online_users(topic), do: list(topic) |> Enum.map(fn {_id, presence} -> presence end) 
-  def list_online_users(), do: list("*") |> Enum.map(fn {_id, presence} -> presence end)
   
   def track_user(topic, name, params), do: track(self(), topic, name, params) 
-  def track_user(name, params), do: track(self(), "*", name, params) 
-
 
   def subscribe(game_id), do: Phoenix.PubSub.subscribe(ExChess.PubSub, "game:" <> game_id)
-  def subscribe(), do: Phoenix.PubSub.subscribe(ExChess.PubSub, "lobby:*")
 end

@@ -17,7 +17,7 @@ defmodule ExChess.Accounts.UserToken do
     field :token, :binary
     field :context, :string
     field :sent_to, :string
-    belongs_to :user, ExChess.Accounts.User
+    belongs_to :user, ExChess.Accounts.User, type: :binary_id
 
     timestamps(updated_at: false)
   end
@@ -25,7 +25,7 @@ defmodule ExChess.Accounts.UserToken do
   @doc """
   Generates a token that will be stored in a signed place,
   such as session or cookie. As they are signed, those
-  tokens do not need to be hashed.
+  tokens do not need to be hashed.Online
 
   The reason why we store session tokens in the database, even
   though Phoenix already provides a session cookie, is because

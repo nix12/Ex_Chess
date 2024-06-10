@@ -38,9 +38,9 @@ defmodule ExChessWeb.Square do
     from = Jason.decode!(from)
     to = Jason.decode!(to)
     current_user = socket.assigns.current_user
-    [player, opponent] = socket.assigns.game.players |> IO.inspect(label: "MOVE GAME")
     board = socket.assigns.board
-    players = [player.id, opponent.id]
+    player = socket.assigns.meta.player.user
+    opponent = socket.assigns.meta.opponent.user
 
     updated_board = 
       cond do
@@ -53,14 +53,10 @@ defmodule ExChessWeb.Square do
         true ->
           raise :player_not_eligible
       end
-
-      if current_user.id in players do
-        Core.move_piece(player, board, from, to)
-      else
-        Core.move_piece(opponent, board, from, to)
-      end
     
     send(self(), {"broadcast_move", updated_board})
+
+    # Save chessboard after move
 
     {:noreply, socket}
   end
@@ -71,17 +67,28 @@ defmodule ExChessWeb.Square do
     location = [x, y]
     current_user = socket.assigns.current_user
     board = socket.assigns.board
+    player = socket.assigns.meta.player
+    opponent = socket.assigns.meta.opponent
 
-    available_moves = {location, type} |> Core.available_moves() |> IO.inspect(label: "{===AVAILABLE MOVES===}")
-    legal_moves = Core.legal_moves(current_user, board, available_moves) |> IO.inspect(label: "{===LEGAL MOVES===}")
+    available_moves = 
+      cond do
+        current_user.id == player.user.user_data.id ->
+          Core.available_moves(board, {location, type}, player)
 
-    {:noreply, push_event(socket, "highlight_moves_#{Jason.encode!(location)}", %{legal_moves: legal_moves})}
+        current_user.id == opponent.user.user_data.id ->
+          Core.available_moves(board, {location, type}, opponent)
+
+        true ->
+          raise :player_not_eligible
+      end
+
+    {:noreply, push_event(socket, "highlight_moves_#{Jason.encode!(location)}", %{available_moves: available_moves})}
   end
   
   # Colors chess boards alternating squares
   defp color_board(location) do
     if location |> Enum.at(0) |> rem(2) != location |> Enum.at(1) |> rem(2) do
-      "bg-gray-600"
+      "bg-slate-400"
     else
       "bg-white"
     end

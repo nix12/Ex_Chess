@@ -4,7 +4,7 @@ defmodule ExChess.Core.Board do
   """
   alias ExChess.Core.Pieces.{Piece, Pawn, Rook, Knight, Bishop, Queen, King}
 
-  @types [Pawn, Rook, Knight, Bishop, Queen, King]
+  @types [Rook]
 
   def new do
     for(x <- 1..8, y <- 1..8, into: %{}, do: {[x, y], nil})
@@ -13,8 +13,11 @@ defmodule ExChess.Core.Board do
   def setup_board(board, color) do
     Enum.map(board, fn square ->
       Enum.map(@types, fn type ->
-        type 
-        |> Piece.new(color) 
+        type.new() 
+        |> type.color(color)
+        |> type.set_icon()
+        |> type.start_location()
+        |> type.move_set()
         |> place_piece(square)
       end) 
       |> Enum.sort()
@@ -35,46 +38,31 @@ defmodule ExChess.Core.Board do
     Enum.find(board, fn {location, _} -> current_location == location end)
   end
   
-  
   def move(player, board, from, to) do
     {_, occupant} = square = Enum.find(board, fn {location, _occupant} -> 
       location == from 
     end) 
-    
-    IO.inspect(legal_moves(player, board, available_moves(square)), label: "LEGAL")
-    IO.inspect(to, label: "TO")
       
-    if to in legal_moves(player, board, available_moves(square)) do
+    if to in available_moves(board, square, player) do
       %{board | from => nil, to => occupant}
     else
       raise :illegal_move
     end
   end
 
-  def available_moves(square) do
-    square
-    |> generate_move_list()
-    |> check_out_of_bounds()
+  def available_moves(board, {_, type} = square, player) do
+    case get_type(type) do
+      ExChess.Core.Pieces.Rook = piece ->
+        piece.range_movement(board, square, player)
+        |> compose_moves()
+
+      _ ->
+        generate_move_list(square)
+    end
   end
 
-  def legal_moves(player, board, moves_list) do
-    for move <- moves_list, into: [] do
-      {location, occupant} = get_location(board, move)
-
-      case occupant do
-        occupant when occupant.color == player.color ->
-          nil
-
-        occupant when occupant.color != player.color ->
-          location
-          
-        nil ->
-          location
-
-        _ -> 
-          nil
-      end
-    end
+  def compose_moves(movements) do
+    for(ranges <- movements, location <- ranges, into: [], do: location)
     |> Enum.reject(&is_nil/1)
   end
   
@@ -82,13 +70,11 @@ defmodule ExChess.Core.Board do
     for [x, y] <- occupant.move_set, do: [x + location_x, y + location_y]
   end
 
-  def check_out_of_bounds(moves_list) do 
-    Enum.filter(moves_list, fn [x, y] = move -> 
-      if x >= 1 and x <= 8 and y >= 1 and y <= 8 do 
-        move 
-      else 
-        nil
-      end
-    end)
+  def get_type(type) do
+    if is_atom(type) do
+      type
+    else
+      type.__struct__
+    end
   end
 end

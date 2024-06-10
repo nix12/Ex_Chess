@@ -32,11 +32,11 @@ Hooks.Sortable = {
     let group = this.el.dataset.group
     let sorter = new Sortable(this.el, {
       group: group ? group : undefined,
-      animation: 50,
-      delay: 50,
+      animation: 100,
+      delay: 100,
       dragClass: "drag-item",
       ghostClass: "drag-ghost",
-      forceFallback: true,
+      forceFallback: true, 
       onEnd: e => {
         let params = {old: e.oldIndex, new: e.newIndex, to: e.to.dataset, ...e.item.dataset}
 
@@ -57,15 +57,15 @@ Hooks.Highlight = {
       let squares = document.querySelectorAll("[data-group='squares']")
 
       squares.forEach(square => {
-        square.classList.remove("!bg-violet-300")
+        square.classList.remove("!bg-red-400")
       });
     })
 
     this.handleEvent(`highlight_moves_${this.el.parentNode.id}`, moves_list => {
-      moves_list["legal_moves"].forEach(location => {
+      moves_list["available_moves"].forEach(location => {
         let move = document.querySelector(`[id='[${location}]']`)
 
-        move.classList.add("!bg-violet-300")
+        move.classList.add("!bg-red-400")
       });
     })
   }
