@@ -1,24 +1,17 @@
 # ExChess
 
-To start your Phoenix server:
-
-  * Run `mix setup` to install and setup dependencies
-  * Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
-
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
-
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
-
-## Learn more
-
-  * Official website: https://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Forum: https://elixirforum.com/c/phoenix-forum
-  * Source: https://github.com/phoenixframework/phoenix
-
-
 ## Notes
 
-  * Add index to username on the users tables.
-  * Refactor after better understanding of contexts.
+  * Range movements for rest of pieces
+  * Fix bug in color assignment
+  * Work on game engine
+  * Save and cache game
+  * Build turn system
+  * Complete rules for winning
+  * Work on associations
+
+## Functionality
+
+  * Chat
+  * Video
+  * Game Playback

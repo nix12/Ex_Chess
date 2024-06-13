@@ -13,17 +13,20 @@ defmodule ExChess.Core do
   Start new game.
   """
   def new_game(game_id) do
-    # case get_game!(game_id) do
-    #   nil ->
-        Map.update!(%Game{}, :id, fn id -> id == game_id end)
+    case update_game(%Game{id: game_id}, %{}) do
+      {:ok, game} -> 
+        game
 
-    #   game -> 
-    #     game
-    # end
+      {:error, changeset} ->
+        IO.inspect(changeset, label: "CHANGESET")
+        # Map.update!(%Game{}, :id, fn id -> id == game_id end)
+        create_game(%{id: game_id})
+    end
   end
 
   def add_player(game, current_user) do
-    %Game{game | player: current_user}
+    # %Game{game | player: current_user}
+    Ecto.build_assoc(game, :users, current_user)
   end
 
   def find_opponent(game, current_user) do
@@ -31,7 +34,8 @@ defmodule ExChess.Core do
 
     navigate_opponent(game, opponent)
 
-    %Game{game | opponent: opponent}
+    # %Game{game | opponent: opponent}
+    Ecto.build_assoc(game, :users, opponent)
   end
 
   def search_for_opponent(current_user) do
@@ -49,9 +53,11 @@ defmodule ExChess.Core do
     )
   end
 
-  # def save_game(game) do
-    
-  # end
+  def save_game(game) do
+    IO.inspect(game, label: "GAME")
+
+    Repo.insert(game)
+  end
   
   @doc """
   Setup both sides of identified board.
@@ -82,7 +88,6 @@ defmodule ExChess.Core do
     PubSub.broadcast!(ExChess.PubSub, "game:#{opponent.id}", {"navigate", params})
   end
 
-################################################
   @doc """
   Returns the list of games.
 

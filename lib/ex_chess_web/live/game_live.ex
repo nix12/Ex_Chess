@@ -91,7 +91,8 @@ defmodule ExChessWeb.GameLive do
   end
 
   def handle_info({"update_game", game}, socket) do
-    IO.puts("UPDATE GAME")
+    IO.puts("===GAME===")
+    
     {:ok, assign(socket, game: game)}
   end
   
@@ -111,6 +112,8 @@ defmodule ExChessWeb.GameLive do
   Broadcast movement of positions to all connected users.
   """
   def handle_info({"broadcast_move", updated_board}, socket) do 
+    Core.save_game(socket.assigns.game)
+
     PubSub.broadcast!(
       ExChess.PubSub,
       "game:" <> socket.assigns.game_id,
@@ -140,7 +143,7 @@ defmodule ExChessWeb.GameLive do
 
     %{
       player: %{user: %{user_data: player, color: player_color}}, 
-      opponent: %{user: %{data: opponent, color: opponent_color(player_color)}}
+      opponent: %{user: %{user_data: opponent, color: opponent_color(player_color)}}
     }
   end
 

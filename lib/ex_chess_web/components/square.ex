@@ -39,15 +39,15 @@ defmodule ExChessWeb.Square do
     to = Jason.decode!(to)
     current_user = socket.assigns.current_user
     board = socket.assigns.board
-    player = socket.assigns.meta.player.user
-    opponent = socket.assigns.meta.opponent.user
+    player = socket.assigns.meta.player
+    opponent = socket.assigns.meta.opponent
 
     updated_board = 
       cond do
-        current_user.id == player.id ->
+        current_user.id == player.user.user_data.id ->
           Core.move_piece(player, board, from, to)
 
-        current_user.id == opponent.id ->
+        current_user.id == opponent.user.user_data.id ->
           Core.move_piece(opponent, board, from, to)
 
         true ->
