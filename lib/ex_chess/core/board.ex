@@ -71,10 +71,15 @@ defmodule ExChess.Core.Board do
   end
 
   def get_type(type) do
-    if is_atom(type) do
-      type
-    else
-      type.__struct__
+    case type do
+      type when is_atom(type) ->
+        type
+
+      type when is_bitstring(type.type) ->
+        String.to_existing_atom(type.type)
+
+      _ ->
+        type.__struct__  
     end
   end
 end

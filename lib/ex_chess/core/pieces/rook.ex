@@ -4,7 +4,9 @@ defmodule ExChess.Core.Pieces.Rook do
   """
   alias ExChess.Core.Board
 
-  defstruct [color: nil, icon: nil, move_set: nil, start_location: nil]
+  @derive {Jason.Encoder, only: [:type, :move_set, :color, :icon, :start_location]} 
+
+  defstruct [type: __MODULE__, color: nil, icon: nil, move_set: nil, start_location: nil]
 
   def new(), do: %__MODULE__{}
 

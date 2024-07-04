@@ -62,7 +62,7 @@ defmodule ExChessWeb.Square do
   end
 
   def handle_event("highlight", params, socket) do
-    <<x::8, y::8, _::8, type::binary>> = Jason.decode!(params) 
+    <<x::8, y::8, _::8, type::binary>> = Jason.decode!(params)
     type = type |> String.to_existing_atom()
     location = [x, y]
     current_user = socket.assigns.current_user
@@ -94,11 +94,22 @@ defmodule ExChessWeb.Square do
     end
   end
 
-  defp id({location, occupant}), do: Jason.encode!("#{location}-#{occupant.__struct__}")
+  defp id({location, %{type: type}}) do
+    Jason.encode!("#{location}-#{type}")
+  end
+
+  defp id({location, %{"type" => type}}) do
+    Jason.encode!("#{location}-#{String.to_existing_atom(type)}")
+  end
   
   defp can_show_icon?({_, occupant}) do
     if occupant != nil, do: true, else: false
   end
 
+  defp show_icon({_, %{"icon" => icon}}), do: icon
   defp show_icon({_, occupant}), do: occupant.icon
+
+  defp key_to_atom(map) do
+    for {k, v} <- map, do: {String.to_atom(k), v}
+  end
 end

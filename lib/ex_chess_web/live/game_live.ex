@@ -5,7 +5,8 @@ defmodule ExChessWeb.GameLive do
   use ExChessWeb, :live_view
 
   alias Phoenix.PubSub
-  alias ExChess.Core
+  alias ExChess.{Repo, Core}
+  alias ExChess.Accounts.User
 
   def mount(%{"game_id" => game_id}, _session, socket) do
     socket = 
@@ -25,7 +26,7 @@ defmodule ExChessWeb.GameLive do
           game_id
           |> Core.new_game()
           |> Core.add_player(current_user)
-          |> Core.find_opponent(current_user)
+          |> Core.find_opponent(current_user)          
 
         meta = meta(game)
 
@@ -34,7 +35,7 @@ defmodule ExChessWeb.GameLive do
         |> assign(page: "show_game")
         |> assign(game_id: game_id)
         |> assign(game: game) 
-        |> assign(board: Core.build_board())
+        |> assign(board: game.board)
         |> assign(meta: meta)
         |> assign(color: get_color_from_meta(current_user, meta))
       else
@@ -111,8 +112,8 @@ defmodule ExChessWeb.GameLive do
   @doc """
   Broadcast movement of positions to all connected users.
   """
-  def handle_info({"broadcast_move", updated_board}, socket) do 
-    Core.save_game(socket.assigns.game)
+  def handle_info({"broadcast_move", updated_board}, socket) do     
+    Core.save_game(socket.assigns.game, updated_board)
 
     PubSub.broadcast!(
       ExChess.PubSub,

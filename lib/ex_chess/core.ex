@@ -13,29 +13,39 @@ defmodule ExChess.Core do
   Start new game.
   """
   def new_game(game_id) do
-    case update_game(%Game{id: game_id}, %{}) do
-      {:ok, game} -> 
-        game
+    case get_game(game_id) do
+      nil ->
+        %Game{id: game_id, board: build_board()}
+        
+      game -> 
+        game = key_to_atom(game)
 
-      {:error, changeset} ->
-        IO.inspect(changeset, label: "CHANGESET")
-        # Map.update!(%Game{}, :id, fn id -> id == game_id end)
-        create_game(%{id: game_id})
+        board = 
+          game.board
+          |> key_to_list() 
+          |> format_occupant()
+
+        %Game{game | board: board}
     end
   end
 
-  def add_player(game, current_user) do
-    # %Game{game | player: current_user}
-    Ecto.build_assoc(game, :users, current_user)
+  def add_player(%Game{player_id: nil} = game, current_user) do
+    %{game | player_id: current_user.id} |> Repo.preload(:player)
   end
 
-  def find_opponent(game, current_user) do
+  def add_player(%Game{player_id: player_id} = game, _current_user) do
+    %{game | player_id: player_id} |> Repo.preload(:player)
+  end
+
+  def find_opponent(%Game{opponent_id: nil} = game, current_user) do
     opponent = search_for_opponent(current_user)
 
     navigate_opponent(game, opponent)
+    %{game | opponent_id: opponent.id} |> Repo.preload(:opponent)
+  end
 
-    # %Game{game | opponent: opponent}
-    Ecto.build_assoc(game, :users, opponent)
+  def find_opponent(%Game{opponent_id: opponent_id} = game, _current_user) do
+    %{game | opponent_id: opponent_id} |> Repo.preload(:opponent)
   end
 
   def search_for_opponent(current_user) do
@@ -53,10 +63,10 @@ defmodule ExChess.Core do
     )
   end
 
-  def save_game(game) do
-    IO.inspect(game, label: "GAME")
-
-    Repo.insert(game)
+  def save_game(game, board) do
+    game
+    |> Game.changeset(%{board: board})
+    |> Repo.insert_or_update!()
   end
   
   @doc """
@@ -116,6 +126,7 @@ defmodule ExChess.Core do
 
   """
   def get_game!(id), do: Repo.get!(Game, id)
+  def get_game(id), do: Repo.get(Game, id)
 
   @doc """
   Creates a game.
@@ -180,5 +191,29 @@ defmodule ExChess.Core do
   """
   def change_game(%Game{} = game, attrs \\ %{}) do
     Game.changeset(game, attrs)
+  end
+
+  # Utility Functions
+  defp key_to_list(map) do
+    for {k, v} <- map, into: %{}, do: {:erlang.binary_to_list(k), v}
+  end
+
+  defp key_to_atom(map) do
+    map
+    |> Map.to_list()
+    |> Enum.reduce(%{}, fn
+      {key, value}, acc when is_atom(key) -> Map.put(acc, key, value)
+      {key, value}, acc when is_binary(key) -> Map.put(acc, String.to_existing_atom(key), value)
+    end)
+  end
+
+  defp format_occupant(board) do
+    for {location, occupant} <- board, into: %{} do
+      if occupant != nil do
+        {location, key_to_atom(occupant)}
+      else
+        {location, nil}
+      end
+    end  
   end
 end

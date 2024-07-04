@@ -9,7 +9,6 @@ defmodule ExChess.Repo.Migrations.CreateUsersAuthTables do
       add :email, :citext, null: false
       add :hashed_password, :string, null: false
       add :confirmed_at, :naive_datetime
-      add :game_id, references(:games, type: :binary_id, on_delete: :delete_all)
 
       timestamps()
     end

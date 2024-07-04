@@ -5,7 +5,7 @@ defmodule ExChess.Accounts.User do
 
   alias ExChess.Core.Game
 
-  @primary_key {:id, Ecto.UUID, autogenerate: true}
+  @primary_key {:id, :binary_id, autogenerate: true}
 
   schema "users" do
     field :username, :string
@@ -15,7 +15,7 @@ defmodule ExChess.Accounts.User do
     field :confirmed_at, :naive_datetime
     field :status, Ecto.Enum, values: [:offline, :online, :searching, :ingame, :watching]
 
-    many_to_many :games, Game, join_through: "games_users"
+    has_many :games, Game
 
     timestamps()
   end
