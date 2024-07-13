@@ -63,10 +63,38 @@ defmodule ExChess.Core do
     )
   end
 
-  def save_game(game, board) do
-    game
-    |> Game.changeset(%{board: board})
-    |> Repo.insert_or_update!()
+  def add_meta(game, player_color, opponent_color) do
+    player = game.player
+    opponent = game.opponent
+
+    if game == nil do
+      %{game | meta: %{player: nil, opponent: nil}}
+    else
+      %{game | 
+        meta: %{
+          player: %{
+            user: %{
+              user_data: player, 
+              color: player_color
+            }
+          }, 
+          opponent: %{
+            user: %{
+              user_data: opponent, 
+              color: opponent_color
+            }
+          }
+        }
+      }
+    end  
+  end
+
+  def save_game(game) do
+    Repo.insert!(
+      game,
+      on_conflict: :replace_all,
+      conflict_target: [:id]
+    )
   end
   
   @doc """

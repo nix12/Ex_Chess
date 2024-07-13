@@ -7,6 +7,7 @@ defmodule ExChessWeb.GameLive do
   alias Phoenix.PubSub
   alias ExChess.{Repo, Core}
   alias ExChess.Accounts.User
+  alias ExChess.Core.Game
 
   def mount(%{"game_id" => game_id}, _session, socket) do
     socket = 
@@ -21,23 +22,33 @@ defmodule ExChessWeb.GameLive do
         
         ExChessWeb.Presence.track_user(game_id, current_user.email, tracking_params)
         ExChessWeb.Presence.subscribe(game_id)
-        
+
         game = 
           game_id
           |> Core.new_game()
           |> Core.add_player(current_user)
-          |> Core.find_opponent(current_user)          
+          |> Core.find_opponent(current_user)  
+          |> case do
+            %{meta: nil} = game ->
+              player_color = color()
+              opponent_color = opponent_color(player_color)
+              game = Core.add_meta(game, player_color, opponent_color)
 
-        meta = meta(game)
+              PubSub.broadcast!(ExChess.PubSub, "game:" <> game_id, {"update_game", game})
 
+              game
+                        
+            %{meta: meta} = game ->
+              %Game{game | meta: keys_to_atoms(meta)}
+          end
+        
         socket
         |> stream(:presences, ExChessWeb.Presence.list_online_users(game_id))
         |> assign(page: "show_game")
         |> assign(game_id: game_id)
         |> assign(game: game) 
         |> assign(board: game.board)
-        |> assign(meta: meta)
-        |> assign(color: get_color_from_meta(current_user, meta))
+        |> assign(color: get_color_from_meta(current_user, game.meta))
       else
         socket
         |> stream(:presences, [])
@@ -58,7 +69,6 @@ defmodule ExChessWeb.GameLive do
         game={@game}
         current_user={@current_user}
         board={@board}
-        meta={@meta}
       />
 
       <div>
@@ -90,12 +100,6 @@ defmodule ExChessWeb.GameLive do
     <h1>Loading</h1>
     """
   end
-
-  def handle_info({"update_game", game}, socket) do
-    IO.puts("===GAME===")
-    
-    {:ok, assign(socket, game: game)}
-  end
   
   def handle_info({ExChessWeb.Presence, {:join, presence}}, socket) do
     {:noreply, stream_insert(socket, :presences, presence)}
@@ -113,46 +117,30 @@ defmodule ExChessWeb.GameLive do
   Broadcast movement of positions to all connected users.
   """
   def handle_info({"broadcast_move", updated_board}, socket) do     
-    Core.save_game(socket.assigns.game, updated_board)
-
     PubSub.broadcast!(
       ExChess.PubSub,
       "game:" <> socket.assigns.game_id,
-      {"update_board", updated_board}
+      {"update_game", %Game{socket.assigns.game | board: updated_board}}
     )
 
     {:noreply, socket}
   end
 
-  @doc """
-  Handles the update of the current state of chessboard
-  """
-  def handle_info({"update_board", updated_board}, socket) do
-    IO.puts("===UPDATE ALL===")
-    
-    {:noreply, assign(socket, board: updated_board)}
+  def handle_info({"update_game", updated_game}, socket) do
+    Core.save_game(updated_game)
+
+    {:noreply, assign(socket, board: updated_game.board, game: updated_game)}
   end
 
   defp display(board) do
     board |> Enum.sort_by(fn {location, _} -> location end, :desc)
   end
 
-  defp meta(game) do
-    player = game.player
-    opponent = game.opponent
-    player_color = color()
-
-    %{
-      player: %{user: %{user_data: player, color: player_color}}, 
-      opponent: %{user: %{user_data: opponent, color: opponent_color(player_color)}}
-    }
-  end
-
-  def color() do
+  defp color() do
     if :rand.uniform(100) < 50, do: :white, else: :black   
   end
 
-  def opponent_color(player_color) do
+  defp opponent_color(player_color) do
     case player_color do
       :white ->
         :black 
@@ -162,7 +150,7 @@ defmodule ExChessWeb.GameLive do
     end
   end  
 
-  def get_color_from_meta(current_user,  meta) do
+  defp get_color_from_meta(current_user, meta) do
     case current_user.id do
       id when id == meta.player.user.user_data.id ->
         meta.player.user.color
@@ -171,4 +159,12 @@ defmodule ExChessWeb.GameLive do
         meta.opponent.user.color
     end
   end
+
+  defp keys_to_atoms(json) when is_map(json) do
+    Map.new(json, &reduce_keys_to_atoms/1)
+  end
+
+  defp reduce_keys_to_atoms({key, val}) when is_map(val), do: {String.to_existing_atom(key), keys_to_atoms(val)}
+  defp reduce_keys_to_atoms({key, val}) when is_list(val), do: {String.to_existing_atom(key), Enum.map(val, &keys_to_atoms(&1))}
+  defp reduce_keys_to_atoms({key, val}), do: {String.to_existing_atom(key), val}
 end

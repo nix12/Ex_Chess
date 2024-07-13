@@ -39,8 +39,8 @@ defmodule ExChessWeb.Square do
     to = Jason.decode!(to)
     current_user = socket.assigns.current_user
     board = socket.assigns.board
-    player = socket.assigns.meta.player
-    opponent = socket.assigns.meta.opponent
+    player = socket.assigns.game.meta.player
+    opponent = socket.assigns.game.meta.opponent
 
     updated_board = 
       cond do
@@ -67,8 +67,8 @@ defmodule ExChessWeb.Square do
     location = [x, y]
     current_user = socket.assigns.current_user
     board = socket.assigns.board
-    player = socket.assigns.meta.player
-    opponent = socket.assigns.meta.opponent
+    player = socket.assigns.game.meta.player
+    opponent = socket.assigns.game.meta.opponent
 
     available_moves = 
       cond do

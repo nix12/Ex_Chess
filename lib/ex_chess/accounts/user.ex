@@ -5,6 +5,13 @@ defmodule ExChess.Accounts.User do
 
   alias ExChess.Core.Game
 
+  @derive {Jason.Encoder, only: [
+    :id, 
+    :username,
+    :email,
+    :status
+  ]} 
+
   @primary_key {:id, :binary_id, autogenerate: true}
 
   schema "users" do
@@ -15,7 +22,8 @@ defmodule ExChess.Accounts.User do
     field :confirmed_at, :naive_datetime
     field :status, Ecto.Enum, values: [:offline, :online, :searching, :ingame, :watching]
 
-    has_many :games, Game
+    has_many :games_as_player, Game, foreign_key: :player_id
+    has_many :games_as_opponent, Game, foreign_key: :opponent_id
 
     timestamps()
   end

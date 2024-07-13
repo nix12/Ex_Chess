@@ -17,7 +17,6 @@ defmodule ExChessWeb.Board do
             game={@game}
             current_user={@current_user}
             board={@board}
-            meta={@meta}
           />
         <% end %>
       </div>

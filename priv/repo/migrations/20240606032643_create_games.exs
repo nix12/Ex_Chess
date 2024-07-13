@@ -15,7 +15,6 @@ defmodule ExChess.Repo.Migrations.CreateGames do
       timestamps()
     end
 
-    create unique_index(:games, [:id])
     create index(:games, [:player_id])
     create index(:games, [:opponent_id])
     create index(:games, [:current_turn])
