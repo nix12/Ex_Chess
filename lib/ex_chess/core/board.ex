@@ -1,13 +1,13 @@
 defmodule ExChess.Core.Board do
-  @moduledoc """
+  @moduledoc"""
   Contains the functions for creating and maintaining a chess board.
   """
-  alias ExChess.Core.Pieces.{Piece, Pawn, Rook, Knight, Bishop, Queen, King}
+  alias ExChess.Core.Pieces.{Pawn, Rook, Knight, Bishop, Queen, King}
 
-  @types [Rook]
+  @types [Rook, Bishop, Queen, Knight, King, Pawn]
 
   def new do
-    for(x <- 1..8, y <- 1..8, into: %{}, do: {[x, y], nil})
+    for(x <- 1..8, y <- 1..8, into: %{}, do: {[y, x], nil})
   end
 
   def setup_board(board, color) do
@@ -15,9 +15,8 @@ defmodule ExChess.Core.Board do
       Enum.map(@types, fn type ->
         type.new() 
         |> type.color(color)
-        |> type.set_icon()
         |> type.start_location()
-        |> type.move_set()
+        |> type.set_icon()
         |> place_piece(square)
       end) 
       |> Enum.sort()
@@ -50,10 +49,22 @@ defmodule ExChess.Core.Board do
     end
   end
 
-  def available_moves(board, {_, type} = square, player) do
-    case get_type(type) do
-      ExChess.Core.Pieces.Rook = piece ->
-        piece.range_movement(board, square, player)
+  def available_moves(board, {_, %{type: type}} = square, player) do
+    case type |> String.to_existing_atom() do
+      Rook ->
+        Rook.range_movement(board, square, player)
+        |> compose_moves()
+
+      Bishop ->
+        Bishop.range_movement(board, square, player)
+        |> compose_moves()
+
+      Queen ->
+        Queen.range_movement(board, square, player)
+        |> compose_moves()
+
+      Pawn ->
+        Pawn.range_movement(board, square, player)
         |> compose_moves()
 
       _ ->
@@ -66,20 +77,19 @@ defmodule ExChess.Core.Board do
     |> Enum.reject(&is_nil/1)
   end
   
-  def generate_move_list({[location_x, location_y], occupant}) do
-    for [x, y] <- occupant.move_set, do: [x + location_x, y + location_y]
-  end
+  def generate_move_list({[location_y, location_x], %{type: type}}) do
+    type = type |> String.to_existing_atom()
 
-  def get_type(type) do
-    case type do
-      type when is_atom(type) ->
-        type
+    for [y, x] <- type.move_set() do
+      calculate_y = y + location_y 
+      calculate_x = x + location_x
 
-      type when is_bitstring(type.type) ->
-        String.to_existing_atom(type.type)
-
-      _ ->
-        type.__struct__  
+      if calculate_y <= 8 and calculate_y >= 1 and calculate_x <= 8 and calculate_x >= 1 do
+        [calculate_y, calculate_x]
+      else
+        nil
+      end
     end
+    |> Enum.reject(&is_nil/1)
   end
 end

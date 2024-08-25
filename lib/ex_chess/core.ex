@@ -9,7 +9,7 @@ defmodule ExChess.Core do
   alias ExChess.Accounts.User
   alias ExChess.Core.{Game, Board}
 
-  @doc """
+  @doc"""
   Start new game.
   """
   def new_game(game_id) do
@@ -97,7 +97,7 @@ defmodule ExChess.Core do
     )
   end
   
-  @doc """
+  @doc"""
   Setup both sides of identified board.
   """
   def build_board() do
@@ -106,7 +106,7 @@ defmodule ExChess.Core do
     |> Board.setup_board(:black)
   end
 
-  @doc """
+  @doc"""
   Move piece on identified board from one square to another.
   """
   def move_piece(player, board, from, to) do
@@ -126,7 +126,7 @@ defmodule ExChess.Core do
     PubSub.broadcast!(ExChess.PubSub, "game:#{opponent.id}", {"navigate", params})
   end
 
-  @doc """
+  @doc"""
   Returns the list of games.
 
   ## Examples
@@ -139,7 +139,7 @@ defmodule ExChess.Core do
     Repo.all(Game)
   end
 
-  @doc """
+  @doc"""
   Gets a single game.
 
   Raises `Ecto.NoResultsError` if the Game does not exist.

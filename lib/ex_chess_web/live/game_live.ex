@@ -1,5 +1,5 @@
 defmodule ExChessWeb.GameLive do
-  @moduledoc """
+  @moduledoc"""
   Shows active game.
   """
   use ExChessWeb, :live_view

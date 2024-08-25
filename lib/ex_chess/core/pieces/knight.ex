@@ -1,16 +1,20 @@
 defmodule ExChess.Core.Pieces.Knight do
-  @moduledoc """
+  @moduledoc"""
   Knight struct
   """
-  defstruct [color: nil, icon: nil, move_set: nil, start_location: nil]
+  @derive {Jason.Encoder, only: [:type, :color, :icon, :start_location]} 
 
-  def color(color), do: %__MODULE__{color: color} |> Map.get(:color)
+  defstruct [type: __MODULE__, color: nil, icon: nil, start_location: nil]
 
-  def move_set(), do: [[1, 2], [1, -2], [-1, 2], [-1, -2], [2, 1], [2, -1], [-2, 1], [-2, -1]]
+  def new(), do: %__MODULE__{}
 
-  def icon(:white), do: "&#x2658;"
-  def icon(:black), do: "&#x265E;"
+  def color(piece, color), do: %__MODULE__{piece | color: color}
+  
+  def move_set, do: [[1, 2], [1, -2], [-1, 2], [-1, -2], [2, 1], [2, -1], [-2, 1], [-2, -1]]
 
-  def start_location(:white), do: [[1, 2], [1, 7]]
-  def start_location(:black), do: [[8, 2], [8, 7]]
+  def set_icon(%__MODULE__{color: :white} = piece), do: %__MODULE__{piece | icon: "&#x2658;"}
+  def set_icon(%__MODULE__{color: :black} = piece), do: %__MODULE__{piece | icon: "&#x265E;"}
+
+  def start_location(%__MODULE__{color: :white} = piece), do: %__MODULE__{piece | start_location: [[1, 2 ], [1, 7]]}
+  def start_location(%__MODULE__{color: :black} = piece), do: %__MODULE__{piece | start_location: [[8, 2], [8, 7]]} 
 end

@@ -1,6 +1,6 @@
 defmodule ExChessWeb.Square do
-  @moduledoc """
-  Render chess board squares.
+  @moduledoc"""
+  Render chess board squares.p
   """
   use ExChessWeb, :live_component
 
@@ -28,7 +28,7 @@ defmodule ExChessWeb.Square do
     """
   end
 
-  @doc """
+  @doc"""
   Receives message from drag and drop actions in the client. Next,
   the position params are converted to usable lists to update the
   server and broadcast changes.
@@ -41,45 +41,41 @@ defmodule ExChessWeb.Square do
     board = socket.assigns.board
     player = socket.assigns.game.meta.player
     opponent = socket.assigns.game.meta.opponent
+    player_id = player.user.user_data.id
+    opponent_id = opponent.user.user_data.id
 
     updated_board = 
-      cond do
-        current_user.id == player.user.user_data.id ->
+      case current_user.id do
+        id when id == player_id ->
           Core.move_piece(player, board, from, to)
 
-        current_user.id == opponent.user.user_data.id ->
+        id when id == opponent_id ->
           Core.move_piece(opponent, board, from, to)
-
-        true ->
-          raise :player_not_eligible
       end
     
     send(self(), {"broadcast_move", updated_board})
-
-    # Save chessboard after move
 
     {:noreply, socket}
   end
 
   def handle_event("highlight", params, socket) do
-    <<x::8, y::8, _::8, type::binary>> = Jason.decode!(params)
-    type = type |> String.to_existing_atom()
-    location = [x, y]
+    [location, type] = String.split(params, " ")
+    type = Jason.decode!(type) |> key_to_atom()
+    location = Jason.decode!(location)
     current_user = socket.assigns.current_user
     board = socket.assigns.board
     player = socket.assigns.game.meta.player
     opponent = socket.assigns.game.meta.opponent
+    player_id = player.user.user_data.id
+    opponent_id = opponent.user.user_data.id
 
     available_moves = 
-      cond do
-        current_user.id == player.user.user_data.id ->
+      case current_user.id do
+        id when id == player_id ->
           Core.available_moves(board, {location, type}, player)
 
-        current_user.id == opponent.user.user_data.id ->
+        id when id == opponent_id ->
           Core.available_moves(board, {location, type}, opponent)
-
-        true ->
-          raise :player_not_eligible
       end
 
     {:noreply, push_event(socket, "highlight_moves_#{Jason.encode!(location)}", %{available_moves: available_moves})}
@@ -94,12 +90,8 @@ defmodule ExChessWeb.Square do
     end
   end
 
-  defp id({location, %{type: type}}) do
-    Jason.encode!("#{location}-#{type}")
-  end
-
-  defp id({location, %{"type" => type}}) do
-    Jason.encode!("#{location}-#{String.to_existing_atom(type)}")
+  defp id({location, occupant}) do
+    "#{Jason.encode!(location)} #{Jason.encode!(occupant)}"
   end
   
   defp can_show_icon?({_, occupant}) do
@@ -110,6 +102,11 @@ defmodule ExChessWeb.Square do
   defp show_icon({_, occupant}), do: occupant.icon
 
   defp key_to_atom(map) do
-    for {k, v} <- map, do: {String.to_atom(k), v}
+    map
+    |> Map.to_list()
+    |> Enum.reduce(%{}, fn
+      {key, value}, acc when is_atom(key) -> Map.put(acc, key, value)
+      {key, value}, acc when is_binary(key) -> Map.put(acc, String.to_existing_atom(key), value)
+    end)
   end
 end

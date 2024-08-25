@@ -1,5 +1,5 @@
 defmodule ExChessWeb.LobbyLive do
-  @moduledoc """
+  @moduledoc"""
   Handles initial connection to application
   """
   require FriendlyID
