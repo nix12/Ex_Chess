@@ -73,6 +73,7 @@ defmodule ExChessWeb.Router do
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
 
       live "/lobby", LobbyLive
+      live "/game/:game_id", GameLive
     end
   end
 
@@ -85,8 +86,6 @@ defmodule ExChessWeb.Router do
       on_mount: [{ExChessWeb.UserAuth, :mount_current_user}] do
       live "/users/confirm/:token", UserConfirmationLive, :edit
       live "/users/confirm", UserConfirmationInstructionsLive, :new
-
-      live "/game/:game_id", GameLive
     end
   end
 

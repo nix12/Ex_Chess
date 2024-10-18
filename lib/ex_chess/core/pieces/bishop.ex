@@ -2,7 +2,7 @@ defmodule ExChess.Core.Pieces.Bishop do
   @moduledoc"""
   Bishop struct
   """
-  alias ExChess.Core.Board
+  alias ExChess.Core.Chessboard
 
   @derive {Jason.Encoder, only: [:type, :color, :icon, :start_location]} 
 
@@ -14,11 +14,11 @@ defmodule ExChess.Core.Pieces.Bishop do
 
   def move_set(), do: [[1, 1], [-1, 1], [-1, -1], [1, -1]]
 
-  def set_icon(%__MODULE__{color: :white} = piece), do: %__MODULE__{piece | icon: "&#x2657;"}
-  def set_icon(%__MODULE__{color: :black} = piece), do: %__MODULE__{piece | icon: "&#x265D;"}
+  def set_icon(%__MODULE__{color: "white"} = piece), do: %__MODULE__{piece | icon: "&#x2657;"}
+  def set_icon(%__MODULE__{color: "black"} = piece), do: %__MODULE__{piece | icon: "&#x265D;"}
 
-  def start_location(%__MODULE__{color: :white} = piece), do: %__MODULE__{piece | start_location: [[1, 3], [1, 6]]}
-  def start_location(%__MODULE__{color: :black} = piece), do: %__MODULE__{piece | start_location: [[8, 3], [8, 6]]}
+  def start_location(%__MODULE__{color: "white"} = piece), do: %__MODULE__{piece | start_location: [[1, 3], [1, 6]]}
+  def start_location(%__MODULE__{color: "black"} = piece), do: %__MODULE__{piece | start_location: [[8, 3], [8, 6]]}
 
   def range_movement(board, {location, _}, player) do
     [
@@ -33,7 +33,7 @@ defmodule ExChess.Core.Pieces.Bishop do
   def upper_right(_, [y, x], _, acc) when x >= 8 or y >= 8, do: acc
   def upper_right(board, [y, x], player, acc) when x >= 1 or y >= 1 do
     diagonal = [y + 1, x + 1]
-    {location, occupant} = Board.get_location(board, diagonal)
+    {location, occupant} = Chessboard.get_location(board, diagonal)
 
     case occupant do
       occupant when occupant.color == player.user.color ->
@@ -51,7 +51,7 @@ defmodule ExChess.Core.Pieces.Bishop do
   def lower_left(_, [y, x], _, acc) when x <= 1 or y <= 1, do: acc
   def lower_left(board, [y, x], player, acc) when x <= 8 or y <= 8 do
     diagonal = [y - 1, x - 1]
-    {location, occupant} = Board.get_location(board, diagonal)
+    {location, occupant} = Chessboard.get_location(board, diagonal)
 
     case occupant do
       occupant when occupant.color == player.user.color ->
@@ -69,7 +69,7 @@ defmodule ExChess.Core.Pieces.Bishop do
   def upper_left(_, [y, x], _, acc) when x <= 1 or y >= 8, do: acc
   def upper_left(board, [y, x], player, acc) when x <= 8 or y >= 1 do
     diagonal = [y + 1, x - 1]
-    {location, occupant} = Board.get_location(board, diagonal)
+    {location, occupant} = Chessboard.get_location(board, diagonal)
 
     case occupant do
       occupant when occupant.color == player.user.color ->
@@ -87,7 +87,7 @@ defmodule ExChess.Core.Pieces.Bishop do
   def lower_right(_, [y, x], _, acc) when x >= 8 or y <= 1, do: acc
   def lower_right(board, [y, x], player, acc) when x >= 1 or y <= 8 do
     diagonal = [y - 1, x + 1]
-    {location, occupant} = Board.get_location(board, diagonal)
+    {location, occupant} = Chessboard.get_location(board, diagonal)
 
     case occupant do
       occupant when occupant.color == player.user.color ->

@@ -47,9 +47,9 @@ defmodule ExChessWeb.LobbyLive do
     {:noreply, socket}
   end
 
-  def handle_info({"navigate", %{game_id: game_id, opponent: opponent}}, socket) do
+  def handle_info({"navigate", %{game_id: game_id, opponent_id: opponent_id}}, socket) do
     socket = 
-      if socket.assigns.current_user.id == opponent.id do
+      if socket.assigns.current_user.id == opponent_id do
         redirect(socket, to: ~p"/game/#{game_id}")
       else
         socket

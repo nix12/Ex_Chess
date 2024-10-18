@@ -3,6 +3,7 @@ defmodule ExChess.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias ExChess.Core.Participants
   alias ExChess.Core.Game
 
   @derive {Jason.Encoder, only: [
@@ -22,8 +23,13 @@ defmodule ExChess.Accounts.User do
     field :confirmed_at, :naive_datetime
     field :status, Ecto.Enum, values: [:offline, :online, :searching, :ingame, :watching]
 
-    has_many :games_as_player, Game, foreign_key: :player_id
-    has_many :games_as_opponent, Game, foreign_key: :opponent_id
+    # has_many :games_as_player, Game, foreign_key: :player_id
+    # has_many :games_as_opponent, Game, foreign_key: :opponent_id
+
+    # many_to_many :participants, Game, join_through: "participants"
+
+    # belongs_to :game, Game
+    # has_one :participants, through: [:game, :participants]
 
     timestamps()
   end

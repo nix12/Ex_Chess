@@ -1,47 +1,99 @@
 defmodule ExChess.Core.Game do
-  use Ecto.Schema
-  import Ecto.Changeset
+	alias ExChess.Repo
+	alias ExChess.Core.Schema.Game
 
-  alias ExChess.Accounts.User
+	@doc"""
+  Returns the list of games.
 
-  @derive {Jason.Encoder, only: [
-    :id, 
-    :in_check?, 
-    :checkmate?, 
-    :board, 
-    :current_turn, 
-    :winner,
-    :meta,
-    :player_id,
-    :opponent_id
-  ]} 
+  ## Examples
 
-  @primary_key {:id, :binary, []}
+      iex> list_games()
+      [%Game{}, ...]
 
-  schema "games" do
-    field :in_check?, :boolean, default: false
-    field :checkmate?, :boolean, default: false
-    field :board, :map
-    field :current_turn, :string
-    field :winner, :string
-    field :meta, :map
-
-    belongs_to :player, User, foreign_key: :player_id, type: :binary_id
-    belongs_to :opponent, User, foreign_key: :opponent_id, type: :binary_id
-
-    # embeds_one :meta, Meta do
-    #   field :player, :map
-    #   field :opponent, :map
-    # end
-    
-    timestamps()
+  """
+  def list_games do
+    Repo.all(Game)
   end
 
-  @doc false
-  def changeset(%__MODULE__{} = game, attrs \\ %{}) do
+  @doc"""
+  Gets a single game.
+
+  Raises `Ecto.NoResultsError` if the Game does not exist.
+
+  ## Examples
+
+      iex> get_game!(123)
+      %Game{}
+
+      iex> get_game!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_game!(id), do: Repo.get!(Game, id)
+  def get_game(id), do: Repo.get(Game, id)
+
+  @doc """
+  Creates a game.
+
+  ## Examples
+
+      iex> create_game(%{field: value})
+      {:ok, %Game{}}
+
+      iex> create_game(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_game(attrs \\ %{}) do
+    %Game{}
+    |> Game.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a game.
+
+  ## Examples
+
+      iex> update_game(game, %{field: new_value})
+      {:ok, %Game{}}
+
+      iex> update_game(game, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_game(%Game{} = game, attrs) do
     game
-    |> cast(attrs, [:id, :in_check?, :checkmate?, :board, :player_id, :opponent_id, :meta])
-    # |> cast_embed(:meta, required: true)
-    |> validate_required([:id, :in_check?, :checkmate?, :player_id, :opponent_id])
+    |> Game.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a game.
+
+  ## Examples
+
+      iex> delete_game(game)
+      {:ok, %Game{}}
+
+      iex> delete_game(game)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_game(%Game{} = game) do
+    Repo.delete(game)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking game changes.
+
+  ## Examples
+
+      iex> change_game(game)
+      %Ecto.Changeset{data: %Game{}}
+
+  """
+  def change_game(%Game{} = game, attrs \\ %{}) do
+    Game.changeset(game, attrs)
   end
 end

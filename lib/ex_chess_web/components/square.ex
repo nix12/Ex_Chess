@@ -47,10 +47,10 @@ defmodule ExChessWeb.Square do
     updated_board = 
       case current_user.id do
         id when id == player_id ->
-          Core.move_piece(player, board, from, to)
+          Core.move_piece(board, player, from, to)
 
         id when id == opponent_id ->
-          Core.move_piece(opponent, board, from, to)
+          Core.move_piece(board, opponent, from, to)
       end
     
     send(self(), {"broadcast_move", updated_board})

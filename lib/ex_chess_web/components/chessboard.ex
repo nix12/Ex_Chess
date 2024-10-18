@@ -1,5 +1,5 @@
-defmodule ExChessWeb.Board do
-  @moduledoc """
+defmodule ExChessWeb.Chessboard do
+  @moduledoc"""
   Chess board live component.
   """
   use ExChessWeb, :live_component
