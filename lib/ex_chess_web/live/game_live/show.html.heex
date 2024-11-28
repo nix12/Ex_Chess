@@ -1,0 +1,42 @@
+<div>
+  <div class="w-5/12 h-auto">
+    <.live_component
+      module={ExChessWeb.Chessboard}
+      id={@game_id}
+      current_user={@current_user}
+      game={@game}
+    />
+
+    <div class="flex bg-red-300 h-1/8 w-1/8 justify-center space-x-8 mt-2">
+      <.button id="complete_turn" phx-click="complete_turn">
+        Done
+      </.button>
+
+      <.button id="reset_board" phx-click="reset_board">
+        Reset
+      </.button>
+
+      <.button phx-click="dummy">
+        Dummy
+      </.button>
+    </div>
+  </div>
+
+  <div>
+    <h4>Current User</h4>
+
+    <span>
+      <%= @current_user.username %> (<%= @color %>)
+    </span>
+  </div>
+
+  <div>
+    <h4>Online User</h4>
+
+    <ul id="online_users" phx-update="stream">
+      <li :for={{dom_id, %{metas: metas}} <- @streams.presences} id={dom_id} not>
+        <%= metas |> Enum.at(0) |> Map.get(:username) %>
+      </li>
+    </ul>
+  </div>
+</div>

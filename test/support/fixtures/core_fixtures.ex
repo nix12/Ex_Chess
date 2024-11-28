@@ -15,7 +15,7 @@ defmodule ExChess.CoreFixtures do
         checkmate?: true,
         in_check?: true
       })
-      |> ExChess.Core.create_game()
+      |> ExChess.Core.Game.create_game()
 
     game
   end

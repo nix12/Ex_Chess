@@ -20,84 +20,84 @@ defmodule ExChess.Core.Pieces.Bishop do
   def start_location(%__MODULE__{color: "white"} = piece), do: %__MODULE__{piece | start_location: [[1, 3], [1, 6]]}
   def start_location(%__MODULE__{color: "black"} = piece), do: %__MODULE__{piece | start_location: [[8, 3], [8, 6]]}
 
-  def range_movement(board, {location, _}, player) do
+  def range_movement(board, {location, _}, current_player_color) do
     [
-      upper_right(board, location, player, []),
-      upper_left(board, location, player, []),
-      lower_left(board, location, player, []),
-      lower_right(board, location, player, [])
+      upper_right(board, location, current_player_color, []),
+      upper_left(board, location, current_player_color, []),
+      lower_left(board, location, current_player_color, []),
+      lower_right(board, location, current_player_color, [])
     ]
   end
 
   def upper_right(_, _, _, acc \\ [])
   def upper_right(_, [y, x], _, acc) when x >= 8 or y >= 8, do: acc
-  def upper_right(board, [y, x], player, acc) when x >= 1 or y >= 1 do
+  def upper_right(board, [y, x], current_player_color, acc) when x >= 1 or y >= 1 do
     diagonal = [y + 1, x + 1]
     {location, occupant} = Chessboard.get_location(board, diagonal)
 
     case occupant do
-      occupant when occupant.color == player.user.color ->
+      %{color: color} when color == current_player_color ->
         [nil | acc]
 
-      occupant when occupant.color != player.user.color ->
+      %{color: color} when color != current_player_color ->
         [location | acc]
 
       nil -> 
-        upper_right(board, location, player, [location | acc])
+        upper_right(board, location, current_player_color, [location | acc])
     end
   end
 
   def lower_left(_, _,  _, acc \\ [])
   def lower_left(_, [y, x], _, acc) when x <= 1 or y <= 1, do: acc
-  def lower_left(board, [y, x], player, acc) when x <= 8 or y <= 8 do
+  def lower_left(board, [y, x], current_player_color, acc) when x <= 8 or y <= 8 do
     diagonal = [y - 1, x - 1]
     {location, occupant} = Chessboard.get_location(board, diagonal)
 
     case occupant do
-      occupant when occupant.color == player.user.color ->
+      %{color: color} when color == current_player_color ->
         [nil | acc]
 
-      occupant when occupant.color != player.user.color ->
+      %{color: color} when color != current_player_color ->
         [location | acc]
 
       nil -> 
-        lower_left(board, location, player, [location | acc])
+        lower_left(board, location, current_player_color, [location | acc])
     end
   end
 
   def upper_left(_, _, _, acc \\ [])
   def upper_left(_, [y, x], _, acc) when x <= 1 or y >= 8, do: acc
-  def upper_left(board, [y, x], player, acc) when x <= 8 or y >= 1 do
+  def upper_left(board, [y, x], current_player_color, acc) when x <= 8 or y >= 1 do
     diagonal = [y + 1, x - 1]
     {location, occupant} = Chessboard.get_location(board, diagonal)
 
     case occupant do
-      occupant when occupant.color == player.user.color ->
+      %{color: color} when color == current_player_color ->
         [nil | acc]
 
-      occupant when occupant.color != player.user.color ->
+      %{color: color} when color != current_player_color ->
         [location | acc]
 
       nil -> 
-        upper_left(board, location, player, [location | acc])
+        upper_left(board, location, current_player_color, [location | acc])
     end
   end
 
   def lower_right(_, _, _, acc \\ [])
   def lower_right(_, [y, x], _, acc) when x >= 8 or y <= 1, do: acc
-  def lower_right(board, [y, x], player, acc) when x >= 1 or y <= 8 do
+  def lower_right(board, [y, x], current_player_color, acc) when x >= 1 or y <= 8 do
     diagonal = [y - 1, x + 1]
     {location, occupant} = Chessboard.get_location(board, diagonal)
 
     case occupant do
-      occupant when occupant.color == player.user.color ->
+      %{color: color} when color == current_player_color ->
         [nil | acc]
 
-      occupant when occupant.color != player.user.color ->
+      %{color: color} when color != current_player_color ->
         [location | acc]
 
       nil -> 
-        lower_right(board, location, player, [location | acc])
+        lower_right(board, location, current_player_color, [location | acc])
     end
   end
 end

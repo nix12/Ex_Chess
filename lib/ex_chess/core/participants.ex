@@ -1,11 +1,10 @@
 defmodule ExChess.Core.Participants do
   alias Phoenix.PubSub
   alias ExChess.Repo
-  alias ExChess.Core.Game
-	alias ExChess.Core.Schema.Participants
+  alias ExChess.Core.Schema.Participants
   alias ExChess.Core.Query.ParticipantsQuery
 
-	@doc"""
+  @doc """
   Returns the list of participantss.
 
   ## Examples
@@ -18,7 +17,7 @@ defmodule ExChess.Core.Participants do
     Repo.all(Participants)
   end
 
-  @doc"""
+  @doc """
   Gets a single participants.
 
   Raises `Ecto.NoResultsError` if the Participants does not exist.

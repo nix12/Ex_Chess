@@ -17,7 +17,7 @@ defmodule ExChess.Accounts.UserToken do
     field :token, :binary
     field :context, :string
     field :sent_to, :string
-    belongs_to :user, ExChess.Accounts.User, type: :binary_id
+    belongs_to :user, ExChess.Accounts.Schema.User, type: :binary_id
 
     timestamps(updated_at: false)
   end

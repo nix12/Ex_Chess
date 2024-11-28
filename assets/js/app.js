@@ -36,7 +36,7 @@ Hooks.Sortable = {
       delay: 100,
       dragClass: "drag-item",
       ghostClass: "drag-ghost",
-      forceFallback: true, 
+      forceFallback: true,
       onEnd: e => {
         let params = {old: e.oldIndex, new: e.newIndex, to: e.to.dataset, ...e.item.dataset}
 
@@ -48,11 +48,11 @@ Hooks.Sortable = {
 
 // Highlights path of available moves.
 Hooks.Highlight = {
-  mounted() {    
+  mounted() {
     this.el.addEventListener("mousedown",  () => {
       this.pushEventTo(this.el, "highlight", this.el.id)}
     )
-    
+
     this.el.addEventListener("mouseup", e => {
       let squares = document.querySelectorAll("[data-group='squares']")
 
@@ -85,4 +85,3 @@ liveSocket.connect()
 // >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
-

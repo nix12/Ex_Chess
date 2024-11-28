@@ -1,60 +1,57 @@
 defmodule ExChess.Core do
-  @moduledoc"""
+  @moduledoc """
   Contains functions for core of the chess application.
   """
-  alias Phoenix.PubSub
   alias ExChess.Repo
   alias ExChess.Core.{Game, Chessboard, Participants}
 
   @doc """
   Finds an existing game or starts a new game.
+
+  ## Examples
+
+      iex> new_game("string_id", %User{})
+      {:ok, %Game{}}
+
   """
-  def new_game(game_id, current_user) do  
+  def new_game(game_id, current_user) do
     case Game.get_game(game_id) do
-      nil -> 
+      nil ->
         opponent_id = Participants.search_for_opponent(current_user) |> Map.get(:id)
         participants = %{player_id: current_user.id, opponent_id: opponent_id}
-        
-        board = 
-          Chessboard.new_board
+
+        board =
+          Chessboard.new_board()
           |> Chessboard.setup_board("black")
           |> Chessboard.setup_board("white")
 
         chessboard = %{board: board}
 
-        {:ok, new_game} = Game.create_game(%{
-          id: game_id, 
-          chessboard: chessboard,
-          participants: participants
-        })
-
-        Participants.navigate_opponent(game_id, opponent_id)
-
-        # PubSub.broadcast!(ExChess.PubSub, "game:" <> game_id, {"update_game", new_game})
-
-        {:ok, new_game}
+        %{id: game_id, chessboard: chessboard, participants: participants}
+        |> Game.create_game()
+        |> tap(fn _ ->
+          Participants.navigate_opponent(game_id, opponent_id)
+        end)
 
       found_game ->
-        # PubSub.broadcast!(ExChess.PubSub, "game:" <> game_id, {"update_game", found_game})
+        found_game = found_game |> Repo.preload([:chessboard, :participants])
 
         updated_board =
           found_game
-          |> Repo.preload(:chessboard)
-          |> board()
+          |> get_in([Access.key!(:chessboard), Access.key!(:board)])
           |> converted_board_keys()
 
-        {:ok, %{found_game | chessboard: %{board: updated_board}} |> Repo.preload(:participants)}
+        updated_game =
+          update_in(found_game, [Access.key!(:chessboard), Access.key!(:board)], fn _ ->
+            updated_board
+          end)
+
+        {:ok, updated_game}
     end
   end
 
   defp converted_board_keys(board) do
     for {location, occupant} <- board, into: %{}, do: {:erlang.binary_to_list(location), occupant}
-  end
-
-  defp board(game) do
-    game  
-    |> Map.get(:chessboard)
-    |> Map.get(:board)
   end
 
   ##############################################################
@@ -66,12 +63,12 @@ defmodule ExChess.Core do
       conflict_target: [:id]
     )
   end
-  
+
   @doc """
   Move piece on identified board from one square to another.
   """
-  def move_piece(player, board, from, to) do
-    Chessboard.move(player, board, from, to)
+  def move_piece(board, player, from, to) do
+    Chessboard.move(board, player, from, to)
   end
 
   def available_moves(board, square, player) do

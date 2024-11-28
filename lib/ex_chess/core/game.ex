@@ -1,8 +1,8 @@
 defmodule ExChess.Core.Game do
-	alias ExChess.Repo
-	alias ExChess.Core.Schema.Game
+  alias ExChess.Repo
+  alias ExChess.Core.Schema.Game
 
-	@doc"""
+  @doc """
   Returns the list of games.
 
   ## Examples
@@ -15,7 +15,7 @@ defmodule ExChess.Core.Game do
     Repo.all(Game)
   end
 
-  @doc"""
+  @doc """
   Gets a single game.
 
   Raises `Ecto.NoResultsError` if the Game does not exist.

@@ -4,8 +4,11 @@ defmodule ExChess.Core.Schema.Chessboard do
 
   alias ExChess.Core.Schema.Game
 
+  @derive {Jason.Encoder, only: [:board, :prev_board]}
+
   schema "chessboards" do
     field :board, :map
+    field :prev_board, :map, virtual: true
 
     belongs_to :game, Game, type: :binary
 
@@ -13,9 +16,9 @@ defmodule ExChess.Core.Schema.Chessboard do
   end
 
   @doc false
-  def changeset(board, attrs) do
-    board
-    |> cast(attrs, [:board])
+  def changeset(chessboard, attrs \\ %{}) do
+    chessboard
+    |> cast(attrs, [:board, :prev_board])
     |> validate_required([:board])
   end
 end

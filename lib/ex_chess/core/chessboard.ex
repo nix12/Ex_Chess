@@ -30,12 +30,12 @@ defmodule ExChess.Core.Chessboard do
   def setup_board(chessboard, color) do
     Enum.map(chessboard, fn square ->
       Enum.map(@types, fn type ->
-        type.new() 
+        type.new()
         |> type.color(color)
         |> type.start_location()
         |> type.set_icon()
         |> place_piece(square)
-      end) 
+      end)
       |> Enum.sort()
       |> List.last()
     end)
@@ -91,7 +91,7 @@ defmodule ExChess.Core.Chessboard do
 
   def place_piece(piece, {location, _} = square) do
     if location in piece.start_location do
-      {location, piece} 
+      {location, piece}
     else
       square
     end
@@ -101,39 +101,28 @@ defmodule ExChess.Core.Chessboard do
     Enum.find(chessboard, fn {location, _} -> current_location == location end)
   end
 
-  def check_placement(player, occupant) do
-    if player.color != occupant.color do
-      occupant
-    else
-      raise :illegal_move
-    end
-  end
-  
-  def move(chessboard, player, from, to) do
-    {_, occupant} = square = Enum.find(chessboard, fn {location, _occupant} -> 
-      location == from 
-    end) 
-      
+  def move(chessboard, current_player_color, from, to) do
+    {_, occupant} =
+      Enum.find(chessboard, fn {location, _occupant} ->
+        location == from
+      end)
+
     %{chessboard | from => nil, to => occupant}
   end
 
-  def available_moves(chessboard, {_, %{type: type}} = square, player) do
-    case type |> String.to_existing_atom() do
+  def available_moves(chessboard, {_, %{"type" => type}} = square, current_player_color) do
+    case String.to_existing_atom(type) do
       Rook ->
-        Rook.range_movement(chessboard, square, player)
-        |> compose_moves()
+        Rook.range_movement(chessboard, square, current_player_color) |> compose_moves()
 
       Bishop ->
-        Bishop.range_movement(chessboard, square, player)
-        |> compose_moves()
+        Bishop.range_movement(chessboard, square, current_player_color) |> compose_moves()
 
       Queen ->
-        Queen.range_movement(chessboard, square, player)
-        |> compose_moves()
+        Queen.range_movement(chessboard, square, current_player_color) |> compose_moves()
 
       Pawn ->
-        Pawn.range_movement(chessboard, square, player)
-        |> compose_moves()
+        Pawn.range_movement(chessboard, square, current_player_color) |> compose_moves()
 
       _ ->
         generate_move_list(square)
@@ -144,12 +133,12 @@ defmodule ExChess.Core.Chessboard do
     for(ranges <- movements, location <- ranges, into: [], do: location)
     |> Enum.reject(&is_nil/1)
   end
-  
-  def generate_move_list({[location_y, location_x], %{type: type}}) do
-    type = type |> String.to_existing_atom()
+
+  def generate_move_list({[location_y, location_x], %{"type" => type}}) do
+    type = String.to_existing_atom(type)
 
     for [y, x] <- type.move_set() do
-      calculate_y = y + location_y 
+      calculate_y = y + location_y
       calculate_x = x + location_x
 
       if calculate_y <= 8 and calculate_y >= 1 and calculate_x <= 8 and calculate_x >= 1 do

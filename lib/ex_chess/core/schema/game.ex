@@ -2,15 +2,13 @@ defmodule ExChess.Core.Schema.Game do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias ExChess.Repo
-  alias ExChess.Accounts.User
-  alias ExChess.Core.Schema.Chessboard
-  alias ExChess.Core.Schema.Participants
+  alias ExChess.Core.Schema.{Chessboard, Participants}
 
   @derive {Jason.Encoder, only: [
     :id, 
     :current_turn, 
     :winner,
+    :chessboard,
     :participants
   ]} 
 
@@ -20,15 +18,6 @@ defmodule ExChess.Core.Schema.Game do
     field :chessboard_id, :integer
     field :current_turn, :string
     field :winner, :string
-
-    # belongs_to :player, User, foreign_key: :player_id, type: :binary_id
-    # belongs_to :opponent, User, foreign_key: :opponent_id, type: :binary_id
-    
-    # many_to_many :participants, User, join_through: "participants"
-
-    # has_one :participants, through: [:users, :participants]
-    # has_many :users, User
-    # has_one :participants, through: [:users, :participants]
 
     has_one :chessboard, Chessboard
     has_one :participants, Participants

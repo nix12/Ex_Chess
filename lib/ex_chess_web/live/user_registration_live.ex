@@ -2,7 +2,7 @@ defmodule ExChessWeb.UserRegistrationLive do
   use ExChessWeb, :live_view
 
   alias ExChess.Accounts
-  alias ExChess.Accounts.User
+  alias ExChess.Accounts.Schema.User
 
   def render(assigns) do
     ~H"""

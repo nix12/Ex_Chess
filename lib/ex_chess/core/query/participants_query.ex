@@ -1,11 +1,11 @@
 defmodule ExChess.Core.Query.ParticipantsQuery do
-	import Ecto.Query, only: [from: 2]
+  import Ecto.Query, only: [from: 2]
 
-	alias ExChess.Accounts.User
+  alias ExChess.Accounts.Schema.User
 
-	@doc"""
-	Search for an opponent from the database where the status is online
-	"""
+  @doc """
+  Search for an opponent from the database where the status is online
+  """
   def opponent_search_query(current_user) do
     from(
       u in User,

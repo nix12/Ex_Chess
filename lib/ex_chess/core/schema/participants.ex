@@ -2,10 +2,10 @@ defmodule ExChess.Core.Schema.Participants do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias ExChess.Accounts.User
+  alias ExChess.Accounts.Schema.User
   alias ExChess.Core.Schema.Game
 
-  @derive {Jason.Encoder, only: [:player_id, :opponent_id]} 
+  @derive {Jason.Encoder, only: [:player_id, :opponent_id]}
 
   schema "participants" do
     field :player_color, :string
@@ -25,7 +25,7 @@ defmodule ExChess.Core.Schema.Participants do
     participants
     |> cast(attrs, [:player_id, :opponent_id, :player_color, :opponent_color])
     |> validate_required([:player_id, :opponent_id])
-    |> prepare_changes(fn 
+    |> prepare_changes(fn
       %Ecto.Changeset{action: :insert} = changeset ->
         set_colors(changeset)
 
@@ -42,16 +42,16 @@ defmodule ExChess.Core.Schema.Participants do
   end
 
   defp color() do
-    if :rand.uniform(100) <= 50, do: "white", else: "black"   
+    if :rand.uniform(100) <= 50, do: "white", else: "black"
   end
 
   defp opponent_color(player_color) do
     case player_color do
       "white" ->
-        "black" 
-    
+        "black"
+
       "black" ->
         "white"
     end
-  end  
+  end
 end
