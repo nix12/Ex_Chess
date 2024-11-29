@@ -1,5 +1,7 @@
 {application,friendlyid,
-             [{applications,[kernel,stdlib,elixir,logger]},
+             [{config_mtime,1722811181},
+              {optional_applications,[]},
+              {applications,[kernel,stdlib,elixir,logger]},
               {description,"Generates friendly, human-readable unique identifiers, like 'BigShinyPenguin'."},
               {modules,['Elixir.FriendlyID']},
               {registered,[]},

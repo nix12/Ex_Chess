@@ -1,5 +1,7 @@
 {application,sobelow,
-             [{applications,[kernel,stdlib,elixir,logger,eex,inets,jason]},
+             [{config_mtime,1722811181},
+              {optional_applications,[]},
+              {applications,[kernel,stdlib,elixir,logger,eex,inets,jason]},
               {description,"Security-focused static analysis for Elixir & the Phoenix framework"},
               {modules,['Elixir.Mix.Tasks.Sobelow','Elixir.Sobelow',
                         'Elixir.Sobelow.CI','Elixir.Sobelow.CI.OS',

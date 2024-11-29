@@ -34,4 +34,10 @@ defmodule ExChessWeb.LobbyLive do
 
     {:noreply, socket}
   end
+
+  def handle_event("dummy", params, socket) do
+    IO.puts("LOBBBY DUMMY")
+    IO.inspect(params, label: "PARAMS")
+    {:noreply, socket}
+  end
 end

@@ -1,5 +1,7 @@
 {application,credo,
-             [{applications,[kernel,stdlib,elixir,bunt,crypto,eex,ex_unit,
+             [{config_mtime,1732760372},
+              {optional_applications,[]},
+              {applications,[kernel,stdlib,elixir,bunt,crypto,eex,ex_unit,
                              file_system,inets,jason,logger]},
               {description,"A static code analysis tool with a focus on code consistency and teaching."},
               {modules,['Elixir.Credo','Elixir.Credo.Application',

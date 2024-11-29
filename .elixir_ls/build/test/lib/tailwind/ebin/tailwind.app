@@ -1,5 +1,7 @@
 {application,tailwind,
-             [{applications,[kernel,stdlib,elixir,logger,castore]},
+             [{config_mtime,1732760371},
+              {optional_applications,[inets,ssl]},
+              {applications,[kernel,stdlib,elixir,logger,inets,ssl,castore]},
               {description,"Mix tasks for installing and invoking tailwind"},
               {modules,['Elixir.Mix.Tasks.Tailwind',
                         'Elixir.Mix.Tasks.Tailwind.Install',

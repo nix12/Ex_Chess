@@ -10,17 +10,15 @@
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
 alias ExChess.Repo
-alias ExChess.Accounts.Schema.User
+alias ExChess.Accounts
 
-Repo.insert_all(User, [
-  %{username: "first", email: "first@email.com", password: "password"},
-  %{username: "second", email: "second@email.com", password: "password"},
-  %{username: "third", email: "third@email.com", password: "password"},
-  %{username: "fourth", email: "fourth@email.com", password: "password"},
-  %{username: "fifth", email: "fifth@email.com", password: "password"},
-  %{username: "sixth", email: "sixth@email.com", password: "password"},
-  %{username: "seventh", email: "seventh@email.com", password: "password"},
-  %{username: "eigth", email: "eigth@email.com", password: "password"},
-  %{username: "nineth", email: "nineth@email.com", password: "password"},
-  %{username: "tenth", email: "tenth@email.com", password: "password"}
-])
+Accounts.register_user(%{username: "first", email: "first@email.com", password: "password"})
+Accounts.register_user(%{username: "second", email: "second@email.com", password: "password"})
+Accounts.register_user(%{username: "third", email: "third@email.com", password: "password"})
+Accounts.register_user(%{username: "fourth", email: "fourth@email.com", password: "password"})
+Accounts.register_user(%{username: "fifth", email: "fifth@email.com", password: "password"})
+Accounts.register_user(%{username: "sixth", email: "sixth@email.com", password: "password"})
+Accounts.register_user(%{username: "seventh", email: "seventh@email.com", password: "password"})
+Accounts.register_user(%{username: "eigth", email: "eigth@email.com", password: "password"})
+Accounts.register_user(%{username: "nineth", email: "nineth@email.com", password: "password"})
+Accounts.register_user(%{username: "tenth", email: "tenth@email.com", password: "password"})

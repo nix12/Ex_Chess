@@ -1,5 +1,7 @@
 {application,plug_crypto,
-             [{applications,[kernel,stdlib,elixir,crypto]},
+             [{config_mtime,1732760373},
+              {optional_applications,[]},
+              {applications,[kernel,stdlib,elixir,crypto]},
               {description,"Crypto-related functionality for the web"},
               {modules,['Elixir.Plug.Crypto','Elixir.Plug.Crypto.Application',
                         'Elixir.Plug.Crypto.KeyGenerator',

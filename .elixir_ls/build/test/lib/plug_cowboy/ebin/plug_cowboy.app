@@ -1,5 +1,7 @@
 {application,plug_cowboy,
-             [{applications,[kernel,stdlib,elixir,logger,plug,cowboy,
+             [{config_mtime,1732760371},
+              {optional_applications,[]},
+              {applications,[kernel,stdlib,elixir,logger,plug,cowboy,
                              cowboy_telemetry]},
               {description,"A Plug adapter for Cowboy"},
               {modules,['Elixir.Plug.Cowboy','Elixir.Plug.Cowboy.Conn',

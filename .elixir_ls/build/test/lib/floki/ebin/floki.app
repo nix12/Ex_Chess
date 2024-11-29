@@ -1,5 +1,7 @@
 {application,floki,
-             [{applications,[kernel,stdlib,elixir,logger]},
+             [{config_mtime,1732760371},
+              {optional_applications,[]},
+              {applications,[kernel,stdlib,elixir,logger]},
               {description,"Floki is a simple HTML parser that enables search for nodes using CSS selectors."},
               {modules,['Elixir.Enumerable.Floki.HTMLTree','Elixir.Floki',
                         'Elixir.Floki.DeepText','Elixir.Floki.Entities',

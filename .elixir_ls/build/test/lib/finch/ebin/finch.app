@@ -1,5 +1,7 @@
 {application,finch,
-             [{applications,[kernel,stdlib,elixir,logger,mint,nimble_pool,
+             [{config_mtime,1732760371},
+              {optional_applications,[]},
+              {applications,[kernel,stdlib,elixir,logger,mint,nimble_pool,
                              nimble_options,telemetry,mime]},
               {description,"An HTTP client focused on performance."},
               {modules,['Elixir.Finch','Elixir.Finch.Error',

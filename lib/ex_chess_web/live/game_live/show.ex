@@ -9,8 +9,6 @@ defmodule ExChessWeb.GameLive.Show do
 
   @impl true
   def mount(%{"game_id" => game_id}, _session, socket) do
-    # socket =
-    # if connected?(socket) do
     current_user = socket.assigns.current_user
 
     tracking_params = %{
@@ -30,14 +28,6 @@ defmodule ExChessWeb.GameLive.Show do
       |> assign(game_id: game_id)
       |> assign(game: game)
       |> assign(color: get_color(game, current_user))
-
-    # else
-    #   socket
-    #   |> stream(:presences, [])
-    #   |> assign(game_id: "")
-    #   |> assign(game: %{})
-    #   |> assign(color: nil)
-    # end
 
     {:ok, socket}
   end
