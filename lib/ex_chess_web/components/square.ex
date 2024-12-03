@@ -38,7 +38,13 @@ defmodule ExChessWeb.Square do
     from = Jason.decode!(from)
     to = Jason.decode!(to)
     current_user = socket.assigns.current_user
-    prev_board = socket.assigns.game.chessboard.board
+
+    prev_board =
+      socket.assigns.game
+      |> Repo.preload(:chessboard)
+      |> get_in([Access.key!(:chessboard), Access.key!(:board)])
+      |> check_conversion_board_keys()
+
     participants = socket.assigns.game.participants |> Repo.preload([:player, :opponent])
 
     updated_board =
@@ -60,7 +66,13 @@ defmodule ExChessWeb.Square do
     item = Jason.decode!(item)
     location = Jason.decode!(location)
     current_user = socket.assigns.current_user
-    board = socket.assigns.game.chessboard.board
+
+    board =
+      socket.assigns.game
+      |> Repo.preload(:chessboard)
+      |> get_in([Access.key!(:chessboard), Access.key!(:board)])
+      |> check_conversion_board_keys()
+
     participants = socket.assigns.game.participants |> Repo.preload([:player, :opponent])
 
     available_moves =
@@ -97,4 +109,16 @@ defmodule ExChessWeb.Square do
 
   defp show_icon({_, %{"icon" => icon}}), do: icon
   defp show_icon({_, occupant}), do: occupant.icon
+
+  defp check_conversion_board_keys(board) do
+    case board do
+      %{<<1, 1>> => _} ->
+        for {location, occupant} <- board,
+            into: %{},
+            do: {:erlang.binary_to_list(location), occupant}
+
+      %{[1, 1] => _} ->
+        board
+    end
+  end
 end

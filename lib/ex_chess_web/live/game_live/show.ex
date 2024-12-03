@@ -5,7 +5,8 @@ defmodule ExChessWeb.GameLive.Show do
   use ExChessWeb, :live_view
 
   alias Phoenix.PubSub
-  alias ExChess.Core
+  alias ExChess.Repo
+  alias ExChess.Core.Game
 
   @impl true
   def mount(%{"game_id" => game_id}, _session, socket) do
@@ -20,7 +21,10 @@ defmodule ExChessWeb.GameLive.Show do
     ExChessWeb.Presence.track_user(game_id, current_user.email, tracking_params)
     ExChessWeb.Presence.subscribe(game_id)
 
-    {:ok, game} = Core.new_game(game_id, current_user)
+    game =
+      game_id
+      |> Game.get_game()
+      |> Repo.preload([:chessboard, :participants])
 
     socket =
       socket
@@ -33,12 +37,6 @@ defmodule ExChessWeb.GameLive.Show do
   end
 
   @impl true
-  def handle_event("dummy", params, socket) do
-    IO.puts("DUMMY")
-    IO.inspect(params, label: "PARAMS")
-    {:noreply, socket}
-  end
-
   def handle_event("complete_turn", _, socket) do
     send(self(), {"broadcast_move"})
 
@@ -46,8 +44,7 @@ defmodule ExChessWeb.GameLive.Show do
   end
 
   def handle_event("reset_board", _, socket) do
-    IO.puts("RESET BOARD")
-    # send(self(), {:reset})
+    send(self(), {:reset})
 
     {:noreply, socket}
   end
@@ -69,26 +66,21 @@ defmodule ExChessWeb.GameLive.Show do
   Broadcast movement of positions to all connected users.
   """
   def handle_info({"broadcast_move"}, socket) do
-    # updated_socket =
-    #   update_in(
-    #     socket.assigns,
-    #     [Access.key!(:game), Access.key!(:chessboard), Access.key!(:board)],
-    #     fn _ -> updated_board end
-    #   )
+    board = socket.assigns.game.chessboard.board
+    prev_board = socket.assigns.game.chessboard.prev_board
 
     PubSub.broadcast!(
       ExChess.PubSub,
       "game:" <> socket.assigns.game_id,
-      {"update_board", socket.assigns.game.chessboard.board}
+      {"update_board", board, prev_board}
     )
 
     {:noreply, socket}
   end
 
   def handle_info({:reset}, socket) do
-    IO.puts("RESET")
     prev_board = socket.assigns.game.chessboard.prev_board
-    IO.inspect(prev_board, label: "===PREV BOARD RESET===")
+
     send(self(), {"update_board", prev_board, %{}})
 
     {:noreply, socket}
@@ -96,7 +88,7 @@ defmodule ExChessWeb.GameLive.Show do
 
   def handle_info({"update_game", game}, socket) do
     IO.puts("UPDATE GAME")
-    # IO.inspect(game.chessboard, label: "PREV BOARD")
+
     {:noreply, assign(socket, :game, game)}
   end
 
@@ -143,6 +135,7 @@ defmodule ExChessWeb.GameLive.Show do
 
   defp get_color(game, current_user) do
     game
+    |> Repo.preload(:participants)
     |> Map.get(:participants)
     |> get_color_from_participants(current_user)
   end

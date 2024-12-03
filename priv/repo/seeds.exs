@@ -19,6 +19,6 @@ Accounts.register_user(%{username: "fourth", email: "fourth@email.com", password
 Accounts.register_user(%{username: "fifth", email: "fifth@email.com", password: "password"})
 Accounts.register_user(%{username: "sixth", email: "sixth@email.com", password: "password"})
 Accounts.register_user(%{username: "seventh", email: "seventh@email.com", password: "password"})
-Accounts.register_user(%{username: "eigth", email: "eigth@email.com", password: "password"})
+Accounts.register_user(%{username: "eighth", email: "eighth@email.com", password: "password"})
 Accounts.register_user(%{username: "nineth", email: "nineth@email.com", password: "password"})
 Accounts.register_user(%{username: "tenth", email: "tenth@email.com", password: "password"})

@@ -33,12 +33,13 @@ defmodule ExChess.Core.Pieces.Pawn do
       pawn_regular(board, location, current_player_color, []),
       pawn_range(board, location, current_player_color, [])
     ]
+    |> IO.inspect(label: "PAWN RANGE MOVEMENT")
   end
 
   def pawn_regular(_, _, _, acc \\ [])
-  def pawn_regular(_, [y, _], "black", acc) when y >= 5, do: acc
+  def pawn_regular(_, [y, _], "black", acc) when y <= 1, do: acc
 
-  def pawn_regular(board, [y, _] = location, "black", _acc) when y <= 7 do
+  def pawn_regular(board, [y, x] = location, "black", _acc) when y <= 7 do
     {[location_y, location_x], _} =
       case Chessboard.get_location(board, location) do
         {_, %{"color" => "black"}} = piece ->
@@ -53,7 +54,10 @@ defmodule ExChess.Core.Pieces.Pawn do
 
     for move <- possible_moves do
       case Chessboard.get_location(board, move) do
-        {_, %{"color" => "white"}} ->
+        {_, %{"color" => "white"}} when move == [y - 1, x - 1] or move == [y + -1, x + 1] ->
+          move
+
+        {_, nil} when move == [y - 1, x] ->
           move
 
         _ ->
@@ -62,9 +66,9 @@ defmodule ExChess.Core.Pieces.Pawn do
     end
   end
 
-  def pawn_regular(_, [y, _], "white", acc) when y >= 4, do: acc
+  def pawn_regular(_, [y, _], "white", acc) when y >= 8, do: acc
 
-  def pawn_regular(board, [y, _] = location, "white", _acc) when y >= 2 do
+  def pawn_regular(board, [y, x] = location, "white", _acc) when y >= 2 do
     {[location_y, location_x], _} =
       case Chessboard.get_location(board, location) do
         {_, %{"color" => "black"}} = piece ->
@@ -78,7 +82,10 @@ defmodule ExChess.Core.Pieces.Pawn do
 
     for move <- possible_moves do
       case Chessboard.get_location(board, move) do
-        {_, %{"color" => "black"}} ->
+        {_, %{"color" => "black"}} when move == [y + 1, x + 1] or move == [y + 1, x + -1] ->
+          move
+
+        {_, nil} when move == [y + 1, x] ->
           move
 
         _ ->

@@ -4,6 +4,8 @@ defmodule ExChessWeb.Chessboard do
   """
   use ExChessWeb, :live_component
 
+  alias ExChess.Repo
+
   def render(assigns) do
     ~H"""
     <div class="flex flex-row flex-row-reverse flex-wrap gap-0 bg-blue-300 h-1/8 w-1/8 justify-center">
@@ -23,7 +25,21 @@ defmodule ExChessWeb.Chessboard do
 
   defp show_display(game) do
     game
+    |> Repo.preload(:chessboard)
     |> get_in([Access.key!(:chessboard), Access.key!(:board)])
+    |> check_conversion_board_keys()
     |> Enum.sort_by(fn {location, _} -> location end, :desc)
+  end
+
+  defp check_conversion_board_keys(board) do
+    case board do
+      %{<<1, 1>> => _} ->
+        for {location, occupant} <- board,
+            into: %{},
+            do: {:erlang.binary_to_list(location), occupant}
+
+      %{[1, 1] => _} ->
+        board
+    end
   end
 end
