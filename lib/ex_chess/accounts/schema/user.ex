@@ -19,7 +19,10 @@ defmodule ExChess.Accounts.Schema.User do
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
-    field :status, Ecto.Enum, values: [:offline, :online, :searching, :ingame, :watching]
+
+    field :status, Ecto.Enum,
+      values: [:offline, :online, :searching, :ingame, :watching],
+      default: :offline
 
     # has_many :games_as_player, Game, foreign_key: :player_id
     # has_many :games_as_opponent, Game, foreign_key: :opponent_id

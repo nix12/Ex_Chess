@@ -33,7 +33,6 @@ defmodule ExChess.Core.Pieces.Pawn do
       pawn_regular(board, location, current_player_color, []),
       pawn_range(board, location, current_player_color, [])
     ]
-    |> IO.inspect(label: "PAWN RANGE MOVEMENT")
   end
 
   def pawn_regular(_, _, _, acc \\ [])
