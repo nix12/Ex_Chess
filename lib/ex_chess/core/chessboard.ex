@@ -1,4 +1,7 @@
 defmodule ExChess.Core.Chessboard do
+  @moduledoc """
+  Functions for building chessboards and controlling piece movements.
+  """
   alias ExChess.Repo
   alias ExChess.Core.Schema.Chessboard
   alias ExChess.Core.Pieces.{Pawn, Rook, Knight, Bishop, Queen, King}

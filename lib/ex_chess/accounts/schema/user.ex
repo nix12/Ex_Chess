@@ -24,14 +24,6 @@ defmodule ExChess.Accounts.Schema.User do
       values: [:offline, :online, :searching, :ingame, :watching],
       default: :offline
 
-    # has_many :games_as_player, Game, foreign_key: :player_id
-    # has_many :games_as_opponent, Game, foreign_key: :opponent_id
-
-    # many_to_many :participants, Game, join_through: "participants"
-
-    # belongs_to :game, Game
-    # has_one :participants, through: [:game, :participants]
-
     timestamps()
   end
 
@@ -69,7 +61,7 @@ defmodule ExChess.Accounts.Schema.User do
   defp validate_username(changeset, opts) do
     changeset
     |> validate_required([:username])
-    |> validate_length(:username, max: 20)
+    |> validate_length(:username, min: 2, max: 50)
     |> maybe_validate_unique_username(opts)
   end
 
@@ -137,7 +129,7 @@ defmodule ExChess.Accounts.Schema.User do
   def username_changeset(user, attrs, opts \\ []) do
     user
     |> cast(attrs, [:username])
-    |> validate_email(opts)
+    |> validate_username(opts)
     |> case do
       %{changes: %{username: _}} = changeset -> changeset
       %{} = changeset -> add_error(changeset, :username, "did not change")

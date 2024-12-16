@@ -114,7 +114,7 @@ defmodule ExChess.Accounts do
   end
 
   def change_user_email(user, attrs \\ %{}) do
-    User.username_changeset(user, attrs, validate_email: false)
+    User.email_changeset(user, attrs, validate_email: false)
   end
 
   @doc """
@@ -153,19 +153,33 @@ defmodule ExChess.Accounts do
   def update_user_email(user, token) do
     context = "change:#{user.email}"
 
-    with {:ok, query} <- UserToken.verify_change_email_token_query(token, context),
+    with {:ok, query} <-
+           UserToken.verify_change_email_token_query(token, context),
          %UserToken{sent_to: email} <- Repo.one(query),
-         {:ok, _} <- Repo.transaction(user_email_multi(user, email, context)) do
+         {:ok, _} <-
+           Repo.transaction(user_email_multi(user, email, context)) do
       :ok
     else
       _ -> :error
     end
   end
 
-  defp user_email_multi(user, username, context) do
+  # def update_user_username(user, token) do
+  #   context = "change:#{user.username}"
+
+  #   with {:ok, query} <- UserToken.verify_change_email_token_query(token, context),
+  #        %UserToken{sent_to: username} <- Repo.one(query),
+  #        {:ok, _} <- Repo.transaction(user_email_multi(user, username, context)) do
+  #     :ok
+  #   else
+  #     _ -> :error
+  #   end
+  # end
+
+  defp user_email_multi(user, email, context) do
     changeset =
       user
-      |> User.email_changeset(%{username: username})
+      |> User.email_changeset(%{email: email})
       |> User.confirm_changeset()
 
     Ecto.Multi.new()
@@ -184,14 +198,15 @@ defmodule ExChess.Accounts do
   """
   def deliver_user_update_email_instructions(
         %User{} = user,
-        current_username,
-        update_username_url_fun
+        current_email,
+        update_email_url_fun
       )
-      when is_function(update_username_url_fun, 1) do
-    {encoded_token, user_token} = UserToken.build_email_token(user, "change:#{current_username}")
+      when is_function(update_email_url_fun, 1) do
+    {encoded_token, user_token} = UserToken.build_email_token(user, "change:#{current_email}")
 
     Repo.insert!(user_token)
-    UserNotifier.deliver_update_email_instructions(user, update_username_url_fun.(encoded_token))
+
+    UserNotifier.deliver_update_email_instructions(user, update_email_url_fun.(encoded_token))
   end
 
   @doc """
@@ -372,21 +387,11 @@ defmodule ExChess.Accounts do
   end
 
   @doc """
-  Update user by username.
-  """
-  def update_user_by_username(username, options) do
-    %User{} = user = get_user_by_username(username)
-    changeset = Ecto.Changeset.change(user, options)
-
-    Repo.update(changeset)
-  end
-
-  @doc """
   Update user.
   """
-  def update_user(id, options) do
-    %User{} = user = get_user!(id)
-    changeset = Ecto.Changeset.change(user, options)
+  def update_user(%User{id: id}, attrs) do
+    user = get_user!(id)
+    changeset = Ecto.Changeset.change(user, attrs)
 
     Repo.update(changeset)
   end

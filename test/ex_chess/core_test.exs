@@ -4,7 +4,7 @@ defmodule ExChess.CoreTest do
   alias ExChess.Core
 
   describe "games" do
-    alias ExChess.Core.Game
+    alias ExChess.Core.Schema.Game
 
     import ExChess.CoreFixtures
 

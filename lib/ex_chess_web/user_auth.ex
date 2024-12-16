@@ -1,4 +1,5 @@
 defmodule ExChessWeb.UserAuth do
+  @moduledoc false
   use ExChessWeb, :verified_routes
 
   import Plug.Conn
@@ -26,7 +27,7 @@ defmodule ExChessWeb.UserAuth do
   if you are not using LiveView.
   """
   def log_in_user(conn, user, params \\ %{}) do
-    Accounts.update_user_by_username(user.username, status: :online)
+    Accounts.update_user(user, status: :online)
 
     token = Accounts.generate_user_session_token(user)
     user_return_to = get_session(conn, :user_return_to)
@@ -73,7 +74,7 @@ defmodule ExChessWeb.UserAuth do
   It clears all session data for safety. See renew_session.
   """
   def log_out_user(conn) do
-    Accounts.update_user(conn.assigns.current_user.id, status: :offline)
+    Accounts.update_user(conn.assigns.current_user, status: :offline)
 
     user_token = get_session(conn, :user_token)
     user_token && Accounts.delete_user_session_token(user_token)

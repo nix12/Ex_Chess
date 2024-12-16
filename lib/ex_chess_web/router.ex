@@ -54,7 +54,7 @@ defmodule ExChessWeb.Router do
 
     live_session :active_user,
       on_mount: [{ExChessWeb.UserAuth, :mount_current_user}] do
-      live "/lobby", LobbyLive
+      live "/lobby", LobbyLive.Lobby, :lobby
     end
   end
 

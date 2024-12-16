@@ -1,4 +1,4 @@
-defmodule ExChessWeb.LobbyLive do
+defmodule ExChessWeb.LobbyLive.Lobby do
   @moduledoc """
   Handles initial connection to application
   """
@@ -12,7 +12,6 @@ defmodule ExChessWeb.LobbyLive do
   def mount(_params, _session, socket) do
     socket =
       if connected?(socket) do
-        IO.puts("LOBBY CONNECTED")
         current_user = socket.assigns[:current_user]
 
         ExChessWeb.Presence.subscribe(current_user.id)
@@ -50,10 +49,6 @@ defmodule ExChessWeb.LobbyLive do
 
   @impl true
   def handle_info({"navigate", %{game_id: game_id, opponent_id: opponent_id}}, socket) do
-    IO.inspect(game_id, label: "GAME ID")
-    IO.inspect(opponent_id, label: "OPPONENT ID")
-    IO.inspect(socket.assigns.current_user.id, label: "CURRENT USER")
-
     socket =
       if socket.assigns.current_user.id == opponent_id do
         redirect(socket, to: ~p"/game/#{game_id}")

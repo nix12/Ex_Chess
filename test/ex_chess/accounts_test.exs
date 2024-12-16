@@ -1,10 +1,23 @@
 defmodule ExChess.AccountsTest do
-  use ExChess.DataCase
+  use ExChess.DataCase, async: true
 
   alias ExChess.Accounts
 
   import ExChess.AccountsFixtures
-  alias ExChess.Accounts.{User, UserToken}
+
+  alias ExChess.Accounts.UserToken
+  alias ExChess.Accounts.Schema.User
+
+  describe "get_user_by_username/1" do
+    test "does not return the user if the username does not exist" do
+      refute Accounts.get_user_by_username("user_name_does_not_exist")
+    end
+
+    test "returns the user if the username does exist" do
+      %{username: username} = user = user_fixture()
+      assert %User{username: ^username} = Accounts.get_user_by_username(user.username)
+    end
+  end
 
   describe "get_user_by_email/1" do
     test "does not return the user if the email does not exist" do
@@ -17,28 +30,28 @@ defmodule ExChess.AccountsTest do
     end
   end
 
-  describe "get_user_by_email_and_password/2" do
+  describe "get_user_by_username_and_password/2" do
     test "does not return the user if the email does not exist" do
-      refute Accounts.get_user_by_email_and_password("unknown@example.com", "hello world!")
+      refute Accounts.get_user_by_username_and_password("unknown@example.com", "hello world!")
     end
 
     test "does not return the user if the password is not valid" do
       user = user_fixture()
-      refute Accounts.get_user_by_email_and_password(user.email, "invalid")
+      refute Accounts.get_user_by_username_and_password(user.email, "invalid")
     end
 
     test "returns the user if the email and password are valid" do
       %{id: id} = user = user_fixture()
 
       assert %User{id: ^id} =
-               Accounts.get_user_by_email_and_password(user.email, valid_user_password())
+               Accounts.get_user_by_username_and_password(user.username, valid_user_password())
     end
   end
 
   describe "get_user!/1" do
     test "raises if id is invalid" do
       assert_raise Ecto.NoResultsError, fn ->
-        Accounts.get_user!(-1)
+        Accounts.get_user!(Ecto.UUID.generate())
       end
     end
 
@@ -58,12 +71,14 @@ defmodule ExChess.AccountsTest do
              } = errors_on(changeset)
     end
 
-    test "validates email and password when given" do
-      {:error, changeset} = Accounts.register_user(%{email: "not valid", password: "not valid"})
+    test "validates username, email, and password when given" do
+      {:error, changeset} =
+        Accounts.register_user(%{username: "x", email: "not valid", password: "invalid"})
 
       assert %{
+               username: ["should be at least 2 character(s)"],
                email: ["must have the @ sign and no spaces"],
-               password: ["should be at least 12 character(s)"]
+               password: ["should be at least 8 character(s)"]
              } = errors_on(changeset)
     end
 
@@ -97,7 +112,7 @@ defmodule ExChess.AccountsTest do
   describe "change_user_registration/2" do
     test "returns a changeset" do
       assert %Ecto.Changeset{} = changeset = Accounts.change_user_registration(%User{})
-      assert changeset.required == [:password, :email]
+      assert changeset.required == [:password, :email, :username]
     end
 
     test "allows fields to be set" do
@@ -117,10 +132,81 @@ defmodule ExChess.AccountsTest do
     end
   end
 
+  describe "change_user_username/2" do
+    test "returns a user changeset for username" do
+      assert %Ecto.Changeset{} = changeset = Accounts.change_user_username(%User{})
+      assert changeset.required == [:username]
+    end
+  end
+
   describe "change_user_email/2" do
     test "returns a user changeset" do
       assert %Ecto.Changeset{} = changeset = Accounts.change_user_email(%User{})
       assert changeset.required == [:email]
+    end
+  end
+
+  describe "apply_user_username/3" do
+    setup do
+      %{user: user_fixture()}
+    end
+
+    test "requires username to change", %{user: user} do
+      {:error, changeset} = Accounts.apply_user_username(user, valid_user_password(), %{})
+      assert %{username: ["did not change"]} = errors_on(changeset)
+    end
+
+    test "validates username", %{user: user} do
+      not_valid = "a"
+
+      {:error, changeset} =
+        Accounts.apply_user_username(user, valid_user_password(), %{username: not_valid})
+
+      assert %{username: ["should be at least 2 character(s)"]} = errors_on(changeset)
+    end
+
+    test "validates maximum value for username for security", %{user: user} do
+      too_long = String.duplicate("db", 100)
+
+      {:error, changeset} =
+        Accounts.apply_user_username(user, valid_user_password(), %{username: too_long})
+
+      assert "should be at most 50 character(s)" in errors_on(changeset).username
+    end
+
+    test "validates minimum value for username", %{user: user} do
+      too_short = "a"
+
+      {:error, changeset} =
+        Accounts.apply_user_username(user, valid_user_password(), %{username: too_short})
+
+      assert "should be at least 2 character(s)" in errors_on(changeset).username
+    end
+
+    test "validates username uniqueness", %{user: user} do
+      %{username: username} = user_fixture()
+      password = valid_user_password()
+
+      {:error, changeset} = Accounts.apply_user_username(user, password, %{username: username})
+
+      assert "has already been taken" in errors_on(changeset).username
+    end
+
+    test "validates current password", %{user: user} do
+      {:error, changeset} =
+        Accounts.apply_user_username(user, "invalid", %{username: unique_user_username()})
+
+      assert %{current_password: ["is not valid"]} = errors_on(changeset)
+    end
+
+    test "applies the email without persisting it", %{user: user} do
+      username = unique_user_username()
+
+      {:ok, user} =
+        Accounts.apply_user_username(user, valid_user_password(), %{username: username})
+
+      assert user.username == username
+      assert Accounts.get_user!(user.id).username != username
     end
   end
 
@@ -206,7 +292,11 @@ defmodule ExChess.AccountsTest do
       %{user: user, token: token, email: email}
     end
 
-    test "updates the email with a valid token", %{user: user, token: token, email: email} do
+    test "updates the email with a valid token", %{
+      user: user,
+      token: token,
+      email: email
+    } do
       assert Accounts.update_user_email(user, token) == :ok
       changed_user = Repo.get!(User, user.id)
       assert changed_user.email != user.email
@@ -262,12 +352,12 @@ defmodule ExChess.AccountsTest do
     test "validates password", %{user: user} do
       {:error, changeset} =
         Accounts.update_user_password(user, valid_user_password(), %{
-          password: "not valid",
+          password: "invalid",
           password_confirmation: "another"
         })
 
       assert %{
-               password: ["should be at least 12 character(s)"],
+               password: ["should be at least 8 character(s)"],
                password_confirmation: ["does not match password"]
              } = errors_on(changeset)
     end
@@ -295,7 +385,7 @@ defmodule ExChess.AccountsTest do
         })
 
       assert is_nil(user.password)
-      assert Accounts.get_user_by_email_and_password(user.email, "new valid password")
+      assert Accounts.get_user_by_username_and_password(user.username, "new valid password")
     end
 
     test "deletes all tokens for the given user", %{user: user} do
@@ -471,12 +561,12 @@ defmodule ExChess.AccountsTest do
     test "validates password", %{user: user} do
       {:error, changeset} =
         Accounts.reset_user_password(user, %{
-          password: "not valid",
+          password: "invalid",
           password_confirmation: "another"
         })
 
       assert %{
-               password: ["should be at least 12 character(s)"],
+               password: ["should be at least 8 character(s)"],
                password_confirmation: ["does not match password"]
              } = errors_on(changeset)
     end
@@ -490,7 +580,7 @@ defmodule ExChess.AccountsTest do
     test "updates the password", %{user: user} do
       {:ok, updated_user} = Accounts.reset_user_password(user, %{password: "new valid password"})
       assert is_nil(updated_user.password)
-      assert Accounts.get_user_by_email_and_password(user.email, "new valid password")
+      assert Accounts.get_user_by_username_and_password(user.username, "new valid password")
     end
 
     test "deletes all tokens for the given user", %{user: user} do
@@ -503,6 +593,21 @@ defmodule ExChess.AccountsTest do
   describe "inspect/2 for the User module" do
     test "does not include password" do
       refute inspect(%User{password: "123456"}) =~ "password: \"123456\""
+    end
+  end
+
+  describe "update_user/2" do
+    setup do
+      user = user_fixture()
+
+      %{user: user}
+    end
+
+    test "updated field should not change field", %{user: user} do
+      assert {:ok, %User{status: :offline}} = Accounts.update_user(user, %{status: :offline})
+      changed_user = Repo.get!(User, user.id)
+      assert changed_user.status == :offline
+      refute Repo.get_by(UserToken, user_id: user.id)
     end
   end
 end
