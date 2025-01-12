@@ -4,6 +4,7 @@
     player, create a separate account and login in a private browsing tab
     or create an account and login on a separate account on different
     device.
+
  `* To be automatically navigated to the 2 player game, both accounts
     must be in the lobby screen. Where upon creating a new game, players
     will be navigated to the game.
