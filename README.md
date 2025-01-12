@@ -1,4 +1,5 @@
 ### Disclaimer
+
   * This application doesn't have any players yet. So to get a second
     player, create a separate account and login in a private browsing tab
     or create an account and login on a separate account on different
