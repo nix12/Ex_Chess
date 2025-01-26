@@ -6,7 +6,7 @@ defmodule ExChessWeb.GameLive.Show do
 
   alias Phoenix.PubSub
   alias ExChess.Repo
-  alias ExChess.Core.Game
+  alias ExChess.Core
 
   @impl true
   def mount(%{"game_id" => game_id}, _session, socket) do
@@ -23,7 +23,7 @@ defmodule ExChessWeb.GameLive.Show do
 
     game =
       game_id
-      |> Game.get_game()
+      |> Core.get_game!()
       |> Repo.preload([:chessboard, :participants])
 
     socket =
@@ -69,11 +69,26 @@ defmodule ExChessWeb.GameLive.Show do
     board = socket.assigns.game.chessboard.board
     prev_board = socket.assigns.game.chessboard.prev_board
 
-    PubSub.broadcast!(
-      ExChess.PubSub,
-      "game:" <> socket.assigns.game_id,
-      {"update_board", board, prev_board}
-    )
+    game =
+      socket.assigns.game_id
+      |> Core.get_game!()
+      |> Repo.preload(:chessboard)
+
+    chessboard_changeset =
+      Ecto.Changeset.change(game.chessboard, %{
+        board: board,
+        prev_board: prev_board
+      })
+
+    game
+    |> Core.save_game(chessboard_changeset)
+    |> then(fn _ ->
+      PubSub.broadcast!(
+        ExChess.PubSub,
+        "game:" <> socket.assigns.game_id,
+        {"update_board", board, prev_board}
+      )
+    end)
 
     {:noreply, socket}
   end
@@ -93,25 +108,15 @@ defmodule ExChessWeb.GameLive.Show do
   end
 
   def handle_info({"update_board", updated_board, prev_board}, socket) do
-    # Core.save_game(updated_game)
     IO.puts("UPDATE BOARD")
 
-    updated_socket =
-      socket.assigns
-      |> update_in(
-        [Access.key!(:game), Access.key!(:chessboard), Access.key!(:board)],
-        fn _ ->
-          updated_board
-        end
-      )
-      |> update_in(
-        [Access.key!(:game), Access.key!(:chessboard), Access.key!(:prev_board)],
-        fn _ ->
-          prev_board
-        end
-      )
+    game =
+      socket.assigns.game
+      |> Ecto.Changeset.change()
+      |> Ecto.Changeset.put_assoc(:chessboard, board: updated_board, prev_board: prev_board)
+      |> Ecto.Changeset.apply_action!(:update)
 
-    send(self(), {"update_game", updated_socket.game})
+    send(self(), {"update_game", game})
 
     {:noreply, socket}
   end

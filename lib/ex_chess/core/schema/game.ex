@@ -19,11 +19,10 @@ defmodule ExChess.Core.Schema.Game do
   @primary_key {:id, :binary, []}
 
   schema "games" do
-    field :chessboard_id, :integer
     field :current_turn, :string
     field :winner, :string
 
-    has_one :chessboard, Chessboard
+    has_one :chessboard, Chessboard, on_replace: :delete
     has_one :participants, Participants
     has_many :users, through: [:participants, :user]
 
@@ -41,6 +40,10 @@ defmodule ExChess.Core.Schema.Game do
   end
 
   def assign_id(game) do
-    Map.put(game, :id, FriendlyID.generate(3))
+    if Map.get(game, :id) do
+      game
+    else
+      Map.put(game, :id, FriendlyID.generate(3))
+    end
   end
 end

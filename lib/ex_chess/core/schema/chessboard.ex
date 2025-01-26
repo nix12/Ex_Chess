@@ -10,7 +10,7 @@ defmodule ExChess.Core.Schema.Chessboard do
     field :board, :map
     field :prev_board, :map, virtual: true
 
-    belongs_to :game, Game, type: :binary
+    belongs_to :game, Game, type: :binary, on_replace: :delete
 
     timestamps()
   end

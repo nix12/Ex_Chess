@@ -14,11 +14,20 @@ defmodule ExChessWeb.LobbyLive.Lobby do
       if connected?(socket) do
         current_user = socket.assigns[:current_user]
 
+        tracking_params = %{
+          id: current_user.email,
+          username: current_user.username,
+          status: current_user.status
+        }
+
+        ExChessWeb.Presence.track_user("lobby", current_user.email, tracking_params)
         ExChessWeb.Presence.subscribe(current_user.id)
 
         socket
+        |> stream(:presences, ExChessWeb.Presence.list_online_users("lobby"))
       else
         socket
+        |> stream(:presences, [])
       end
 
     {:ok, socket}
@@ -35,7 +44,7 @@ defmodule ExChessWeb.LobbyLive.Lobby do
       |> Chessboard.setup_board("black")
       |> Chessboard.setup_board("white")
 
-    chessboard = %{board: board}
+    chessboard = %{board: board, prev_board: nil}
 
     {:ok, game} =
       %{chessboard: chessboard, participants: participants}
@@ -48,6 +57,18 @@ defmodule ExChessWeb.LobbyLive.Lobby do
   end
 
   @impl true
+  def handle_info({ExChessWeb.Presence, {:join, presence}}, socket) do
+    {:noreply, stream_insert(socket, :presences, presence)}
+  end
+
+  def handle_info({ExChessWeb.Presence, {:leave, presence}}, socket) do
+    if presence.metas == [] do
+      {:noreply, stream_delete(socket, :presences, presence)}
+    else
+      {:noreply, stream_insert(socket, :presences, presence)}
+    end
+  end
+
   def handle_info({"navigate", %{game_id: game_id, opponent_id: opponent_id}}, socket) do
     socket =
       if socket.assigns.current_user.id == opponent_id do

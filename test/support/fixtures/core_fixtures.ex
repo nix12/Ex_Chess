@@ -1,7 +1,7 @@
 defmodule ExChess.CoreFixtures do
   @moduledoc """
   This module defines test helpers for creating
-  entities via the `ExChess.Core` context.
+  entities via the `ExChess.Game` context.
   """
 
   @doc """
@@ -11,9 +11,8 @@ defmodule ExChess.CoreFixtures do
     {:ok, game} =
       attrs
       |> Enum.into(%{
-        board: %{},
-        checkmate?: true,
-        in_check?: true
+        current_turn: nil,
+        winner: nil
       })
       |> ExChess.Core.Game.create_game()
 
