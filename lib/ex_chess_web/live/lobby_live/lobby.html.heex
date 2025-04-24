@@ -1,6 +1,4 @@
 <div>
-  <h3>Online Plyaers: <%= Enum.count(@streams.presences) %></h3>
-
   <h3>Actions</h3>
 
   <.button id="create_game" phx-click="create_game">
@@ -12,4 +10,14 @@
       Join Game
     </.button>
   </.link>
+
+  <div>
+    <h3>Online Players: <%= Enum.count(@streams.presences) %></h3>
+
+    <ul id="online_users" phx-update="stream">
+      <li :for={{dom_id, %{metas: metas}} <- @streams.presences} id={dom_id} not>
+        <%= metas |> Enum.at(0) |> Map.get(:username) %>
+      </li>
+    </ul>
+  </div>
 </div>

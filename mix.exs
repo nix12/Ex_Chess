@@ -54,6 +54,7 @@ defmodule ExChess.MixProject do
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:sobelow, "~> 0.12", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.16", only: :dev, runtime: false},
+      {:ex_machina, "~> 2.8.0", only: :test},
       {:friendlyid, "~> 0.2.0"}
     ]
   end

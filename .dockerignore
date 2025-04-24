@@ -27,7 +27,7 @@
 # Common development/test artifacts
 /cover/
 /doc/
-/test/
+# /test/
 /tmp/
 .elixir_ls
 
@@ -46,3 +46,5 @@ erl_crash.dump
 
 .elixir-tools
 lexical
+
+.env

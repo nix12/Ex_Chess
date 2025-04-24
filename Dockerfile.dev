@@ -1,0 +1,39 @@
+FROM elixir:1.16.3-otp-25-alpine
+
+RUN \
+    apk --no-cache --update upgrade && \
+    apk --no-cache add \
+      expat-dev \
+      g++ \
+      git \
+      grep \
+      make \
+      openssh \
+      vim \
+      inotify-tools
+
+
+RUN mkdir /app
+
+COPY mix.exs mix.lock ./app
+
+RUN mkdir /app/config
+
+COPY config/config.exs config/dev.exs config/runtime.exs config/test.exs /app/config/
+COPY assets /app/assets
+COPY lib /app/lib
+COPY priv /app/priv
+COPY test /app/test
+
+WORKDIR /app
+
+RUN mix local.hex --force && \
+    mix local.rebar --force
+
+RUN mix deps.get
+RUN mix assets.setup
+RUN mix deps.compile
+
+ENV PORT=4000
+
+CMD ["mix", "phx.server"]

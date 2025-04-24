@@ -1,0 +1,29 @@
+networks:
+  ex_chess-net:
+    driver: bridge
+
+volumes:
+  exchessdata:
+
+services:
+  db:
+    image: postgres:latest
+    env_file: ".env"
+    volumes:
+      - exchessdata:/var/lib/postgresql/data
+    networks: 
+      - ex_chess-net
+    ports:
+      - "5432:5432"
+  
+  app:
+    image: planetnix/ex_chess:dev
+    restart: always
+    ports:
+      - "4000:4000"
+    depends_on:
+      - db
+    volumes:
+      - exchessdata:/var/lib/postgresql/data
+    networks: 
+      - ex_chess-net

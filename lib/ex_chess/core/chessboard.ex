@@ -16,7 +16,7 @@ defmodule ExChess.Core.Chessboard do
       iex> create_board(%{field: value})
       {:ok, %Chessboard{}}
 
-      iex> create_board%{field: bad_value})
+      iex> create_board(%{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
