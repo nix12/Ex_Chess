@@ -3,7 +3,31 @@ defmodule ExChess.Factory do
     use ExMachina.Ecto, repo: ExChess.Repo
 
     def chessboard_factory do
-      %ExChess.Core.Schema.Chessboard{board: , prev_board: nil}
+      %ExChess.Core.Schema.Chessboard{
+        board: for(x <- 1..8, y <- 1..8, into: %{}, do: {[y, x], nil}), 
+        prev_board: nil
+      }
+    end
+
+    def game_factory do
+      ExChess.Core.Schema.Game{
+        current_turn: nil,
+        winner: nil,
+        chessboard: build(:chessboard),
+        participants: build(:participants),
+      }
+    end
+
+    def participants_factory do
+      ExChess.Core.Schema.Participants{
+        player_color: ,
+        opponent_color: ,
+        in_check?: false,
+        checkmate?: false,
+        game: build(:game),
+        player: build(:user),
+        opponent: build(:user)
+      }
     end
   
     def user_factory do

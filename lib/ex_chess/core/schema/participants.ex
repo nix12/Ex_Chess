@@ -8,8 +8,8 @@ defmodule ExChess.Core.Schema.Participants do
   @derive {Jason.Encoder, only: [:player_id, :opponent_id]}
 
   schema "participants" do
-    field :player_color, :string
-    field :opponent_color, :string
+    field :player_color, Ecto.Enum, values: ["white", "black"]
+    field :opponent_color, Ecto.Enum, values: ["white", "black"]
     field :in_check?, :boolean, default: false
     field :checkmate?, :boolean, default: false
 
