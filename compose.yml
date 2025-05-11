@@ -8,7 +8,6 @@ volumes:
 services:
   db:
     image: postgres:latest
-    env_file: ".env"
     volumes:
       - exchessdata:/var/lib/postgresql/data
     networks: 
@@ -17,7 +16,7 @@ services:
       - "5432:5432"
   
   app:
-    image: planetnix/ex_chess:dev
+    image: planetnix/ex_chess:dev    
     restart: always
     ports:
       - "4000:4000"
